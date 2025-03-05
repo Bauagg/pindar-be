@@ -7,5 +7,6 @@ router.get("/all", getUsers);
 router.post("/sign-up", signUp);
 router.post("/confirm-otp", confirmOtp);
 router.post("/sign-in", loginUser);
+router.post("/signan", loginUser);
 
 module.exports = router;

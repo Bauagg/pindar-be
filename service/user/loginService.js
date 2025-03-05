@@ -49,7 +49,7 @@ export const loginUserService = async (email, encryptedPassword) => {
 
         // Generate Refresh Token
         const refreshToken = jwt.sign(
-            { email: user.email },
+            { email: user.email, roles: user.roles },
             process.env.JWT_SECRET,
             { expiresIn: `${refreshTokenExpiryMinutes}m` }
         );
