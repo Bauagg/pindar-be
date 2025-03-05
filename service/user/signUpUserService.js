@@ -1,10 +1,10 @@
-
 import nodemailer from "nodemailer";
-import {smtpConfig} from "../../configuration/smtpConfiguration.js";
-import {validateUser} from "../../utils/validation.js";
-import {decryptPassword, hashPassword} from "../../utils/encryption.js";
-import {userRepository, getUserByEmail} from "../../repository/userRepository.js";
-import {insertOtp} from "../../repository/otpRepository.js";
+import { smtpConfig } from "../../configuration/smtpConfiguration.js";
+import { validateUser } from "../../utils/validation.js";
+import { decryptPassword, hashPassword } from "../../utils/encryption.js";
+import { userRepository, getUserByEmail } from "../../repository/userRepository.js";
+import { insertOtp } from "../../repository/otpRepository.js";
+import { getParameter } from "../../repository/parameterRepository.js";
 import bcrypt from "bcryptjs";
 import pool from "../../configuration/dbConfiguration.js";
 
@@ -44,9 +44,10 @@ export const signUpUser = async ({ full_name, email, phone_number, password }) =
         await insertOtp(email, hashedOtp, expiresAt, client);
         await client.query("COMMIT");
 
-        sendOTP(email, otpCode).catch((err) => {
+        sendOTP(email, otpCode, client).catch((err) => {
             console.error("Failed to send OTP:", err.message);
         });
+
         return {
             code: 201,
             message: "User registered, OTP sent.",
@@ -54,22 +55,39 @@ export const signUpUser = async ({ full_name, email, phone_number, password }) =
         };
     } catch (error) {
         await client.query("ROLLBACK");
-        throw error; // Will be caught by the global error handler
+        throw error;
     } finally {
         client.release();
     }
 };
 
+const sendOTP = async (email, otpCode, client) => {
+    try {
+        // Fetch OTP email template and subject from parameters table
+        const otpTemplate = await getParameter("OTP_EMAIL_TEMPLATE", client);
+        const otpSubject = await getParameter("OTP_EMAIL_SUBJECT", client);
 
-const sendOTP = async (email, otpCode) => {
-    const transporter = nodemailer.createTransport(smtpConfig);
+        if (!otpTemplate || !otpSubject) {
+            throw new Error("OTP email template or subject is missing in parameters table.");
+        }
 
-    const mailOptions = {
-        from: process.env.SMTP_USER,
-        to: email,
-        subject: "Your OTP Code",
-        text: `Your OTP code is: ${otpCode}`
-    };
+        // Replace placeholder {{OTP}} with actual OTP code
+        const emailText = otpTemplate.replace("{{OTP}}", otpCode);
 
-    await transporter.sendMail(mailOptions);
+        // Create transporter
+        const transporter = nodemailer.createTransport(smtpConfig);
+
+        // Email options
+        const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: email,
+            subject: otpSubject,
+            text: emailText
+        };
+
+        // Send email
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error("Error sending OTP email:", error.message);
+    }
 };

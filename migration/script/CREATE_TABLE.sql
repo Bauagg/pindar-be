@@ -53,8 +53,3 @@ CREATE TABLE parameters (
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-INSERT INTO parameters (param_key, param_value, description)
-VALUES
-    ('ACCESS_TOKEN_EXPIRY_MINUTES', '60', 'Access token expiration time in minutes'),
-    ('REFRESH_TOKEN_EXPIRY_MINUTES', '21600', 'Refresh token expiration time in minutes (15 days)');
