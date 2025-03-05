@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import pool from "../../configuration/dbConfiguration.js";
-import {activateUser, getOtpByEmail, markOtpAsVerified} from "../../repository/otp/otpRepository.js";
+import {activateUser, getOtpByEmail, markOtpAsVerified} from "../../repository/otpRepository.js";
 
 export const confirmOtpService = async (email, otpCode) => {
     const client = await pool.connect();

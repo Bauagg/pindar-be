@@ -3,8 +3,8 @@ import nodemailer from "nodemailer";
 import {smtpConfig} from "../../configuration/smtpConfiguration.js";
 import {validateUser} from "../../utils/validation.js";
 import {decryptPassword, hashPassword} from "../../utils/encryption.js";
-import {createUser, getUserByEmail} from "../../repository/user/createUser.js";
-import {insertOtp} from "../../repository/otp/otpRepository.js";
+import {userRepository, getUserByEmail} from "../../repository/userRepository.js";
+import {insertOtp} from "../../repository/otpRepository.js";
 import bcrypt from "bcryptjs";
 import pool from "../../configuration/dbConfiguration.js";
 
@@ -32,7 +32,7 @@ export const signUpUser = async ({ full_name, email, phone_number, password }) =
 
         let userId;
         if (!existingUser) {
-            userId = await createUser(full_name, email, phone_number, hashedPassword, client);
+            userId = await userRepository(full_name, email, phone_number, hashedPassword, client);
         } else {
             userId = existingUser.id;
         }

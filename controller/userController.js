@@ -1,6 +1,7 @@
 import { fetchUser } from "../service/user/getAllusers.js";
 import {signUpUser} from "../service/user/signUpUserService.js";
 import {confirmOtpService} from "../service/user/confirmOtpService.js";
+import {loginUserService} from "../service/user/loginService.js";
 
 
 
@@ -48,3 +49,20 @@ export const confirmOtp = async (req, res, next) => {
     }
 };
 
+
+export const loginUser = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            const error = new Error("Email and password are required.");
+            error.status = 400;
+            throw error;
+        }
+
+        const response = await loginUserService(email, password);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};

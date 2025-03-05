@@ -35,3 +35,26 @@ CREATE TABLE otp_sessions (
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       expires_at TIMESTAMP NOT NULL
 );
+
+CREATE TABLE refresh_tokens (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID NOT NULL,
+        token TEXT NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        revoked BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE parameters (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        param_key VARCHAR(255) UNIQUE NOT NULL,
+        param_value TEXT NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO parameters (param_key, param_value, description)
+VALUES
+    ('ACCESS_TOKEN_EXPIRY_MINUTES', '60', 'Access token expiration time in minutes'),
+    ('REFRESH_TOKEN_EXPIRY_MINUTES', '21600', 'Refresh token expiration time in minutes (15 days)');

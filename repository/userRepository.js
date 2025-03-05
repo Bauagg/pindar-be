@@ -1,7 +1,7 @@
-import pool from "../../configuration/dbConfiguration.js";
+import pool from "../configuration/dbConfiguration.js";
 
 
-export const createUser = async (fullName, email, phoneNumber, hashedPassword) => {
+export const userRepository = async (fullName, email, phoneNumber, hashedPassword) => {
     const client = await pool.connect();
     try {
         const userQuery = `
@@ -30,4 +30,23 @@ export const getUserByEmail = async (email, client) => {
     `;
     const { rows } = await client.query(query, [email]);
     return rows.length > 0 ? rows[0] : null;
+};
+
+export const getUserAndRoleByEmail = async (email, client) => {
+    const query = `
+        SELECT u.id, u.email, u.password, u.status, 
+               ARRAY_AGG(r.name) AS roles
+        FROM users u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.email = $1
+        GROUP BY u.id;
+    `;
+    const { rows } = await client.query(query, [email]);
+    return rows.length > 0 ? rows[0] : null;
+};
+
+export const updateLastLogin = async (userId, client) => {
+    const query = `UPDATE users SET last_login = NOW() WHERE id = $1;`;
+    await client.query(query, [userId]);
 };

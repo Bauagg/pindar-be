@@ -1,4 +1,4 @@
-import pool from "../../configuration/dbConfiguration.js";
+import pool from "../configuration/dbConfiguration.js";
 
 
 export const insertOtp = async (email, otpCode, expiresAt) => {
