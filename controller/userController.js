@@ -2,6 +2,7 @@ import { fetchUser } from "../service/user/getAllusers.js";
 import {signUpUser} from "../service/user/signUpUserService.js";
 import {confirmOtpService} from "../service/user/confirmOtpService.js";
 import {loginUserService} from "../service/user/loginService.js";
+import {refreshTokenService} from "../service/security/refreshTokenService.js";
 
 
 
@@ -66,3 +67,21 @@ export const loginUser = async (req, res, next) => {
         next(error);
     }
 };
+
+export const refreshToken = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            const error = new Error("Refresh token is required.");
+            error.status = 400;
+            throw error;
+        }
+
+        const response = await refreshTokenService(refreshToken);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
