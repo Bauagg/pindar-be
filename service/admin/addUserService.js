@@ -1,7 +1,7 @@
 import pool from "../../configuration/dbConfiguration.js";
 import {getUserByEmail, insertUser, reactivateUser} from "../../repository/userRepository.js";
 import {decryptPassword, hashPassword} from "../../utils/encryption.js";
-import {getValidRoles, insertUserRoles} from "../../repository/roleRepository.js";
+import {getValidRoles, updateUserRoles} from "../../repository/roleRepository.js";
 
 export const addUserService = async (full_name, email, encryptedPassword, roles) => {
     const client = await pool.connect();
@@ -44,7 +44,7 @@ export const addUserService = async (full_name, email, encryptedPassword, roles)
         }
 
         // Assign roles to user
-        await insertUserRoles(userId, validRoles, client);
+        await updateUserRoles(userId, validRoles, client);
 
         await client.query("COMMIT");
 

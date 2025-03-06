@@ -69,3 +69,20 @@ export const reactivateUser = async (userId, client) => {
     await client.query(query, [userId]);
 };
 
+export const updateUserData = async (full_name, email, status, client) => {
+    const query = `
+        UPDATE users 
+        SET full_name = $1, status = $2, updated_date = NOW()
+        WHERE email = $3;
+    `;
+    await client.query(query, [full_name, status, email]);
+};
+
+export const softDeleteUser = async (email, client) => {
+    const query = `
+        UPDATE users 
+        SET is_deleted = TRUE, status = 'INACTIVE', updated_date = NOW()
+        WHERE email = $1;
+    `;
+    await client.query(query, [email]);
+};
