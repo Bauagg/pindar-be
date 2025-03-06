@@ -1,28 +1,11 @@
-import { fetchUser } from "../service/user/getAllusers.js";
+
 import {signUpUser} from "../service/user/signUpUserService.js";
 import {confirmOtpService} from "../service/user/confirmOtpService.js";
 import {loginUserService} from "../service/auth/customerSignInService.js";
 import {refreshTokenService} from "../service/auth/refreshTokenService.js";
+import {listCustomersService} from "../service/user/listCustomerService.js";
 
 
-
-export const getUsers = async (req, res, next) => {
-    try {
-        const { limit = 10, offset = 0, search = "", sortBy, sortDirection } = req.query;
-
-        const response = await fetchUser(
-            parseInt(limit, 10),
-            parseInt(offset, 10),
-            search,
-            sortBy,
-            sortDirection
-        );
-
-        res.status(response.code).json(response);
-    } catch (error) {
-        next(error); // Pass the error to Express error handler
-    }
-};
 
 export const signUp = async (req, res, next) => {
     try {
@@ -79,6 +62,30 @@ export const refreshToken = async (req, res, next) => {
         }
 
         const response = await refreshTokenService(refreshToken);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const listCustomers = async (req, res, next) => {
+    try {
+        const {
+            limit = 10,
+            offset = 0,
+            search = "",
+            sortBy = "fullName",
+            sortDirection = "asc"
+        } = req.query;
+
+        const response = await listCustomersService(
+            parseInt(limit),
+            parseInt(offset),
+            search,
+            sortBy,
+            sortDirection
+        );
+
         res.status(response.code).json(response);
     } catch (error) {
         next(error);
