@@ -50,3 +50,22 @@ export const updateLastLogin = async (userId, client) => {
     const query = `UPDATE users SET last_login = NOW() WHERE id = $1;`;
     await client.query(query, [userId]);
 };
+
+export const insertUser = async (full_name, phone_number, email, hashedPassword, client) => {
+    const query = `
+        INSERT INTO users (full_name, phone_number, email, password, status, is_deleted)
+        VALUES ($1, $2, $3, $4, 'ACTIVE', FALSE) RETURNING id;
+    `;
+    const { rows } = await client.query(query, [full_name, phone_number, email, hashedPassword]);
+    return rows[0].id;
+};
+
+export const reactivateUser = async (userId, client) => {
+    const query = `
+        UPDATE users 
+        SET is_deleted = FALSE, status = 'ACTIVE' 
+        WHERE id = $1;
+    `;
+    await client.query(query, [userId]);
+};
+
