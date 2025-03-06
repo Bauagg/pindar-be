@@ -239,3 +239,17 @@ export const updateCustomerPassword = async (id, hashedPassword, client) => {
     `;
     await client.query(query, [hashedPassword, id]);
 };
+
+export const getCustomerDetailById = async (id, client) => {
+    const query = `
+        SELECT u.id, u.email, u.full_name AS "fullName", u.user_name AS "userName",
+               u.phone_number AS "phoneNumber", u.address, u.status, u.is_deleted AS "isDeleted"
+        FROM users u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.id = $1 AND r.name = 'CUSTOMER';
+    `;
+
+    const { rows } = await client.query(query, [id]);
+    return rows.length > 0 ? rows[0] : null;
+};

@@ -7,6 +7,7 @@ import {listCustomersService} from "../service/user/listCustomerService.js";
 import {updateCustomerStatusService} from "../service/user/updateCustomerStatusService.js";
 import {updateCustomerService} from "../service/user/updateCustomerService.js";
 import {changePasswordService} from "../service/user/changePasswordService.js";
+import {getCustomerDetailService} from "../service/user/getCustomerDetailService.js";
 
 
 
@@ -142,6 +143,23 @@ export const changePassword = async (req, res, next) => {
         }
 
         const response = await changePasswordService(id, email, oldPassword, newPassword);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getCustomerDetail = async (req, res, next) => {
+    try {
+        const { id } = req.user; // Extracted from Bearer Token
+
+        if (!id) {
+            const error = new Error("Unauthorized access. User ID is required.");
+            error.status = 401;
+            throw error;
+        }
+
+        const response = await getCustomerDetailService(id);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);
