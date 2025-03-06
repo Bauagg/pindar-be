@@ -20,5 +20,5 @@ export const decryptPassword = (encryptedPassword) => {
 
 export const hashPassword = async (email, decryptedPassword) => {
     const salt = await bcrypt.genSalt(10);
-    return await bcrypt.hash(email + decryptedPassword, salt);
+    return await bcrypt.hash(decryptedPassword, salt);
 };

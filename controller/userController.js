@@ -5,6 +5,7 @@ import {loginUserService} from "../service/auth/customerSignInService.js";
 import {refreshTokenService} from "../service/auth/refreshTokenService.js";
 import {listCustomersService} from "../service/user/listCustomerService.js";
 import {updateCustomerStatusService} from "../service/user/updateCustomerStatusService.js";
+import {updateCustomerService} from "../service/user/updateCustomerService.js";
 
 
 
@@ -104,6 +105,24 @@ export const updateCustomerStatus = async (req, res, next) => {
         }
 
         const response = await updateCustomerStatusService(id, status);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateCustomer = async (req, res, next) => {
+    try {
+        const { id } = req.user; // Extracted from Bearer Token
+        const { email, fullName, userName, phoneNumber, address } = req.body;
+
+        if (!id) {
+            const error = new Error("Unauthorized access. User ID is required.");
+            error.status = 401;
+            throw error;
+        }
+
+        const response = await updateCustomerService(id, email, fullName, userName, phoneNumber, address);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);

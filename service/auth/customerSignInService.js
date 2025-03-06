@@ -25,7 +25,7 @@ export const loginUserService = async (email, encryptedPassword) => {
         const decryptedPassword = decryptPassword(encryptedPassword);
 
         // Validate password
-        const isMatch = await bcrypt.compare(email+decryptedPassword, user.password);
+        const isMatch = await bcrypt.compare(decryptedPassword, user.password);
         if (!isMatch) {
             const error = new Error("Invalid email or password.");
             error.status = 401;
@@ -42,7 +42,7 @@ export const loginUserService = async (email, encryptedPassword) => {
 
         // Generate JWT Access Token with multiple roles
         const accessToken = jwt.sign(
-            { email: user.email, roles: user.roles },
+            { email: user.email, roles: user.roles, id: user.id },
             process.env.JWT_SECRET,
             { expiresIn: `${accessTokenExpiryMinutes}m` }
         );

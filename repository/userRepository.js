@@ -191,3 +191,30 @@ export const updateCustomerStatusInDB = async (id, status, client) => {
     `;
     await client.query(query, [status, id]);
 };
+
+export const checkEmailExists = async (email, id, client) => {
+    const query = `SELECT id FROM users WHERE email = $1 AND id <> $2;`;
+    const { rows } = await client.query(query, [email, id]);
+    return rows.length > 0;
+};
+
+export const checkPhoneNumberExists = async (phoneNumber, id, client) => {
+    const query = `SELECT id FROM users WHERE phone_number = $1 AND id <> $2 AND phone_number IS NOT NULL;`;
+    const { rows } = await client.query(query, [phoneNumber, id]);
+    return rows.length > 0;
+};
+
+export const updateCustomerInDB = async (id, email, fullName, userName, phoneNumber, address, client) => {
+    const query = `
+        UPDATE users 
+        SET email = COALESCE($1, email),
+            full_name = COALESCE($2, full_name),
+            user_name = COALESCE($3, user_name),
+            phone_number = COALESCE($4, phone_number),
+            address = COALESCE($5, address),
+            updated_date = NOW()
+        WHERE id = $6;
+    `;
+    await client.query(query, [email, fullName, userName, phoneNumber, address, id]);
+};
+
