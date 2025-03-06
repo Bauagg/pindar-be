@@ -218,3 +218,24 @@ export const updateCustomerInDB = async (id, email, fullName, userName, phoneNum
     await client.query(query, [email, fullName, userName, phoneNumber, address, id]);
 };
 
+export const getCustomerPasswordById = async (id, client) => {
+    const query = `
+        SELECT u.id, u.password, u.is_deleted AS "isDeleted"
+        FROM users u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.id = $1 AND r.name = 'CUSTOMER';
+    `;
+
+    const { rows } = await client.query(query, [id]);
+    return rows.length > 0 ? rows[0] : null;
+};
+
+export const updateCustomerPassword = async (id, hashedPassword, client) => {
+    const query = `
+        UPDATE users 
+        SET password = $1, updated_date = NOW()
+        WHERE id = $2;
+    `;
+    await client.query(query, [hashedPassword, id]);
+};

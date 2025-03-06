@@ -6,6 +6,7 @@ import {refreshTokenService} from "../service/auth/refreshTokenService.js";
 import {listCustomersService} from "../service/user/listCustomerService.js";
 import {updateCustomerStatusService} from "../service/user/updateCustomerStatusService.js";
 import {updateCustomerService} from "../service/user/updateCustomerService.js";
+import {changePasswordService} from "../service/user/changePasswordService.js";
 
 
 
@@ -123,6 +124,24 @@ export const updateCustomer = async (req, res, next) => {
         }
 
         const response = await updateCustomerService(id, email, fullName, userName, phoneNumber, address);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const changePassword = async (req, res, next) => {
+    try {
+        const { id, email } = req.user; // Extracted from Bearer Token
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            const error = new Error("Old password and new password are required.");
+            error.status = 400;
+            throw error;
+        }
+
+        const response = await changePasswordService(id, email, oldPassword, newPassword);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);
