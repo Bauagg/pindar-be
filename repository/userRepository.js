@@ -169,3 +169,25 @@ export const getTotalCustomers = async (search, client) => {
     const { rows } = await client.query(query, [`%${search}%`]);
     return rows[0].total;
 };
+
+export const getCustomerById = async (id, client) => {
+    const query = `
+        SELECT u.id, u.full_name AS "fullName", u.email, u.status, u.is_deleted AS "isDeleted"
+        FROM users u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.id = $1 AND r.name = 'CUSTOMER';
+    `;
+
+    const { rows } = await client.query(query, [id]);
+    return rows.length > 0 ? rows[0] : null;
+};
+
+export const updateCustomerStatusInDB = async (id, status, client) => {
+    const query = `
+        UPDATE users 
+        SET status = $1, updated_date = NOW()
+        WHERE id = $2;
+    `;
+    await client.query(query, [status, id]);
+};

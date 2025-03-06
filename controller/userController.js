@@ -4,6 +4,7 @@ import {confirmOtpService} from "../service/user/confirmOtpService.js";
 import {loginUserService} from "../service/auth/customerSignInService.js";
 import {refreshTokenService} from "../service/auth/refreshTokenService.js";
 import {listCustomersService} from "../service/user/listCustomerService.js";
+import {updateCustomerStatusService} from "../service/user/updateCustomerStatusService.js";
 
 
 
@@ -92,3 +93,19 @@ export const listCustomers = async (req, res, next) => {
     }
 };
 
+export const updateCustomerStatus = async (req, res, next) => {
+    try {
+        const { id, status } = req.body;
+
+        if (!id || !status) {
+            const error = new Error("Id and status are required.");
+            error.status = 400;
+            throw error;
+        }
+
+        const response = await updateCustomerStatusService(id, status);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
