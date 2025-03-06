@@ -3,6 +3,7 @@ import {addUserService} from "../service/admin/addUserService.js";
 import {updateUserService} from "../service/admin/updateUserService.js";
 import {deleteUserService} from "../service/admin/deleteUserService.js";
 import {listUsersService} from "../service/admin/listUserService.js";
+import {getUserDetailService} from "../service/admin/getUserDetailService.js";
 
 
 export const adminSignIn = async (req, res, next) => {
@@ -92,6 +93,23 @@ export const listUsers = async (req, res, next) => {
             sortDirection
         );
 
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getUserDetail = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            const error = new Error("User ID is required.");
+            error.status = 400;
+            throw error;
+        }
+
+        const response = await getUserDetailService(id);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);

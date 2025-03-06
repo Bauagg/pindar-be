@@ -38,7 +38,7 @@ export const addUserService = async (full_name, email, encryptedPassword, roles)
         let userId;
         if (!existingUser) {
             // Insert new user
-            userId = await insertUser(full_name, "00", email, hashedPassword, client);
+            userId = await insertUser(full_name, null, email, hashedPassword, client);
         } else {
             userId = existingUser.id; // Use existing user ID if reactivating
         }

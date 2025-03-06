@@ -120,3 +120,18 @@ export const getTotalAdminUsers = async (search, client) => {
     const { rows } = await client.query(query, [`%${search}%`]);
     return rows[0].total;
 };
+
+export const getUserById = async (id, client) => {
+    const query = `
+        SELECT u.id, u.full_name AS "fullName", u.email, u.status, u.is_deleted AS "isDeleted", 
+               ARRAY_AGG(r.name) AS roles
+        FROM users u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.id = $1
+        GROUP BY u.id;
+    `;
+
+    const { rows } = await client.query(query, [id]);
+    return rows.length > 0 ? rows[0] : null;
+};
