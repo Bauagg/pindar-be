@@ -2,6 +2,7 @@ import {adminSignInService} from "../service/auth/adminSignInService.js";
 import {addUserService} from "../service/admin/addUserService.js";
 import {updateUserService} from "../service/admin/updateUserService.js";
 import {deleteUserService} from "../service/admin/deleteUserService.js";
+import {listUsersService} from "../service/admin/listUserService.js";
 
 
 export const adminSignIn = async (req, res, next) => {
@@ -67,6 +68,30 @@ export const deleteUser = async (req, res, next) => {
         }
 
         const response = await deleteUserService(email);
+        res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const listUsers = async (req, res, next) => {
+    try {
+        const {
+            limit = 10,
+            offset = 0,
+            search = "",
+            sortBy = "fullName",
+            sortDirection = "asc"
+        } = req.query;
+
+        const response = await listUsersService(
+            parseInt(limit),
+            parseInt(offset),
+            search,
+            sortBy,
+            sortDirection
+        );
+
         res.status(response.code).json(response);
     } catch (error) {
         next(error);

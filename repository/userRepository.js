@@ -86,3 +86,37 @@ export const softDeleteUser = async (email, client) => {
     `;
     await client.query(query, [email]);
 };
+
+export const getAdminUsers = async (limit, offset, search, sortBy, sortOrder, client) => {
+    const query = `
+        SELECT u.id, u.full_name AS "fullName", u.email, u.status, u.is_deleted AS "isDeleted", 
+               ARRAY_AGG(r.name) AS roles
+        FROM users u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.is_deleted = FALSE
+          AND r.name NOT IN ('CUSTOMER')
+          AND (u.full_name ILIKE $1 OR u.email ILIKE $1)
+        GROUP BY u.id
+        ORDER BY ${sortBy} ${sortOrder}
+        LIMIT $2 OFFSET $3;
+    `;
+
+    const { rows } = await client.query(query, [`%${search}%`, limit, offset]);
+    return rows;
+};
+
+export const getTotalAdminUsers = async (search, client) => {
+    const query = `
+        SELECT COUNT(DISTINCT u.id) AS total
+        FROM users u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+        WHERE u.is_deleted = FALSE
+          AND r.name NOT IN ('CUSTOMER')
+          AND (u.full_name ILIKE $1 OR u.email ILIKE $1);
+    `;
+
+    const { rows } = await client.query(query, [`%${search}%`]);
+    return rows[0].total;
+};
