@@ -1,4 +1,4 @@
-name: Deploy Backend - ${{ github.event.head_commit.message }}
+name: Deploy Backend
 
 on:
   push:
