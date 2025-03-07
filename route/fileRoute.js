@@ -1,7 +1,7 @@
 const express = require("express");
-const {adminSignIn, addUser, updateUser, deleteUser, listUsers, getUserDetail} = require("../controller/adminController");
 const multer = require("multer");
 const {uploadFile} = require("../controller/fileController.js");
+const {getImageById} = require("../controller/fileController.js");
 const router = express.Router();
 
 const allowedImageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -19,5 +19,6 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 
 router.post("/image", upload.single("file"), uploadFile);
+router.get("/image/:id.:ext", getImageById);
 
 module.exports = router;
