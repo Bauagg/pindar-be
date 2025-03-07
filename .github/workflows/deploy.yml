@@ -33,16 +33,12 @@ jobs:
           "
 
       - name: Notify Discord
-        if: ${{ always() && secrets.DISCORD_WEBHOOK != '' }}
+        if: always()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           if [ "${{ job.status }}" = "success" ]; then
-            MESSAGE="✅ Backend deployment successful! Commit: ${{ github.event.head_commit.message }}"
+            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"✅ Backend deployment successful!\"}" $DISCORD_WEBHOOK
           else
-            MESSAGE="❌ Backend deployment failed! Commit: ${{ github.event.head_commit.message }}"
-          fi
-          
-          if [ ! -z "$DISCORD_WEBHOOK" ]; then
-            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"$MESSAGE\"}" $DISCORD_WEBHOOK
+            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"❌ Backend deployment failed!\"}" $DISCORD_WEBHOOK
           fi
