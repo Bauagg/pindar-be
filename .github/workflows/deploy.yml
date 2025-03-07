@@ -1,4 +1,4 @@
-name: Deploy Backend
+name: Deploy Admin
 
 on:
   push:
@@ -8,8 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Setup SSH
         run: |
@@ -19,32 +18,25 @@ jobs:
           eval $(ssh-agent -s)
           ssh-add ~/.ssh/deploy_key
 
-      - name: Add known hosts
-        run: |
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-
-      - name: Test SSH connection
-        run: ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH connection successful'"
-
       - name: Deploy to server
         env:
-          DEPLOY_PATH: /var/www/pindar/backend
+          DEPLOY_PATH: /var/www/pindar
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "\
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+            cd ${DEPLOY_PATH}/admin && \
+            git pull origin main && \
             cd ${DEPLOY_PATH} && \
-            sudo -E git pull origin main && \
-            cd .. && \
-            sudo -E docker compose up -d --build backend && \
-            sudo -E docker compose logs backend"
+            docker compose up -d --build admin && \
+            docker compose logs admin
+          "
 
-      - name: Send Discord Notification
+      - name: Notify Discord
         if: always()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           if [ "${{ job.status }}" = "success" ]; then
-            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"✅ Backend deployment successful! Commit: ${{ github.event.head_commit.message }}\"}" $DISCORD_WEBHOOK
+            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"✅ Admin deployment successful!\"}" $DISCORD_WEBHOOK
           else
-            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"❌ Backend deployment failed! Commit: ${{ github.event.head_commit.message }}\"}" $DISCORD_WEBHOOK
+            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"❌ Admin deployment failed!\"}" $DISCORD_WEBHOOK
           fi
