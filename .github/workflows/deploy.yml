@@ -1,4 +1,4 @@
-name: Deploy Admin
+name: Deploy Backend
 
 on:
   push:
@@ -23,20 +23,26 @@ jobs:
           DEPLOY_PATH: /var/www/pindar
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            cd ${DEPLOY_PATH}/admin && \
+            cd ${DEPLOY_PATH}/backend && \
             git pull origin main && \
             cd ${DEPLOY_PATH} && \
-            docker compose up -d --build admin && \
-            docker compose logs admin
+            docker compose up -d --build backend && \
+            echo 'Waiting for container to start...' && \
+            sleep 10 && \
+            docker compose logs backend --tail 50
           "
 
       - name: Notify Discord
-        if: always()
+        if: ${{ always() && secrets.DISCORD_WEBHOOK != '' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           if [ "${{ job.status }}" = "success" ]; then
-            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"✅ Admin deployment successful!\"}" $DISCORD_WEBHOOK
+            MESSAGE="✅ Backend deployment successful! Commit: ${{ github.event.head_commit.message }}"
           else
-            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"❌ Admin deployment failed!\"}" $DISCORD_WEBHOOK
+            MESSAGE="❌ Backend deployment failed! Commit: ${{ github.event.head_commit.message }}"
+          fi
+          
+          if [ ! -z "$DISCORD_WEBHOOK" ]; then
+            curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"$MESSAGE\"}" $DISCORD_WEBHOOK
           fi
