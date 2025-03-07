@@ -39,6 +39,10 @@ export const uploadFile = async (req, res, next) => {
             data: { fileId, extension },
         });
     } catch (error) {
+        // Handle file size limit error
+        if (error.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({ code: 400, message: "File size exceeds 2MB limit." });
+        }
         next(error);
     }
 };
