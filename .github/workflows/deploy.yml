@@ -33,9 +33,10 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "\
             cd ${DEPLOY_PATH} && \
-            git pull origin main && \
-            docker compose up -d --build backend && \
-            docker compose logs backend"
+            sudo -E git pull origin main && \
+            cd .. && \
+            sudo -E docker compose up -d --build backend && \
+            sudo -E docker compose logs backend"
 
       - name: Send Discord Notification
         if: always()
