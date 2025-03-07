@@ -8,6 +8,7 @@ import {updateCustomerStatusService} from "../service/user/updateCustomerStatusS
 import {updateCustomerService} from "../service/user/updateCustomerService.js";
 import {changePasswordService} from "../service/user/changePasswordService.js";
 import {getCustomerDetailService} from "../service/user/getCustomerDetailService.js";
+import {deleteRefreshTokenService} from "../service/user/logoutService.js";
 
 
 
@@ -161,6 +162,17 @@ export const getCustomerDetail = async (req, res, next) => {
 
         const response = await getCustomerDetailService(id);
         res.status(response.code).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const logout = async (req, res, next) => {
+    try {
+        const { id } = req.user; // Extract user ID from token
+        await deleteRefreshTokenService(id);
+
+        res.status(200).json({ code: 200, message: "Logged out successfully." });
     } catch (error) {
         next(error);
     }
