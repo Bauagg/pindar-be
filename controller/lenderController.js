@@ -3,6 +3,7 @@ import {modifyLender} from "../service/lender/updateLenderService.js";
 import {removeLender} from "../service/lender/deleteLenderService.js";
 import {getLenders} from "../service/lender/searchLenderService.js";
 import {getLenderDetailById} from "../service/lender/getLenderDetailService.js";
+import {fetchLenderDropdown} from "../service/lender/getLenderDropdownService.js";
 
 export const addLender = async (req, res, next) => {
     try {
@@ -57,6 +58,19 @@ export const getLenderDetail = async (req, res, next) => {
             code: 200,
             message: 'Lender detail retrieved successfully.',
             data: lenderData
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getLenderDropdown = async (req, res, next) => {
+    try {
+        const lenders = await fetchLenderDropdown();
+        res.status(200).json({
+            code: 200,
+            message: 'Lender dropdown retrieved successfully.',
+            data: lenders,
         });
     } catch (err) {
         next(err);

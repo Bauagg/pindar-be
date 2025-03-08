@@ -169,3 +169,19 @@ export const findLenderRelationsByType = async (lenderId, relationType) => {
 
     return rows;
 };
+
+export const fetchLenderDropdownData = async () => {
+    const query = `
+    SELECT 
+      l.id,
+      l.lender_name AS "lenderName",
+      CONCAT('/file/image/', f.id, '.', f.file_extension) AS "imageLink"
+    FROM lender l
+    LEFT JOIN files f ON l.image_id = f.id::uuid
+    WHERE l.is_deleted = FALSE
+    ORDER BY l.lender_name ASC;
+  `;
+
+    const { rows } = await pool.query(query);
+    return rows;
+};

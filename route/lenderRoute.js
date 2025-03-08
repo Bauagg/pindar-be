@@ -4,6 +4,7 @@ const {updateLender} = require("../controller/lenderController.js");
 const {deleteLender} = require("../controller/lenderController.js");
 const {listLenders} = require("../controller/lenderController.js");
 const {getLenderDetail} = require("../controller/lenderController.js");
+const {getLenderDropdown} = require("../controller/lenderController.js");
 const router = express.Router();
 
 
@@ -12,5 +13,6 @@ router.put('/update', updateLender);
 router.delete('/delete/:id', deleteLender);
 router.get('/list', listLenders);
 router.get('/detail/:id', getLenderDetail);
+router.get('/list-dropdown', getLenderDropdown);
 
 module.exports = router;
