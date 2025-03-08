@@ -2,6 +2,7 @@ import {createLender} from "../service/lender/createLenderService.js";
 import {modifyLender} from "../service/lender/updateLenderService.js";
 import {removeLender} from "../service/lender/deleteLenderService.js";
 import {getLenders} from "../service/lender/searchLenderService.js";
+import {getLenderDetailById} from "../service/lender/getLenderDetailService.js";
 
 export const addLender = async (req, res, next) => {
     try {
@@ -41,6 +42,21 @@ export const listLenders = async (req, res, next) => {
             code: 200,
             message: 'Lender list retrieved successfully.',
             data: result
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getLenderDetail = async (req, res, next) => {
+    try {
+        const lenderId = req.params.id;
+        const lenderData = await getLenderDetailById(lenderId);
+
+        res.status(200).json({
+            code: 200,
+            message: 'Lender detail retrieved successfully.',
+            data: lenderData
         });
     } catch (err) {
         next(err);

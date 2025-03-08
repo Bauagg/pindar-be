@@ -110,7 +110,7 @@ export const fetchLenders = async (limit, offset, search, sortBy, sortDirection)
     try {
         const searchQuery = `%${search}%`;
         const lendersResult = await client.query(
-            `SELECT l.lender_name, CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, l.max_tenor AS maxTenor, l.max_loan AS maxLoan
+            `SELECT l.id, l.lender_name, CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, l.max_tenor AS maxTenor, l.max_loan AS maxLoan
              FROM lender l
                       LEFT JOIN files f ON l.image_id = f.id
              WHERE l.is_deleted = FALSE AND l.lender_name ILIKE $1
@@ -131,4 +131,41 @@ export const fetchLenders = async (limit, offset, search, sortBy, sortDirection)
     } finally {
         client.release();
     }
+};
+
+export const findLenderById = async (id) => {
+    const query = `
+        SELECT
+            l.lender_name,
+            l.direct_link,
+            l.max_loan,
+            l.max_tenor,
+            l.loan_type,
+            ld.additional_information,
+            ld.terms_document,
+            CONCAT('/file/image/', f.id, f.file_extension) AS image_link,
+            lt.type_name AS type_loan_total
+        FROM lender l
+                 LEFT JOIN lender_detail ld ON l.id = ld.lender_id
+                 LEFT JOIN files f ON l.image_id = f.id::uuid
+    LEFT JOIN loan_type lt ON l.max_loan BETWEEN lt.min_loan AND lt.max_loan
+        WHERE l.id = $1 AND l.is_deleted = FALSE
+    `;
+    const { rows } = await pool.query(query, [id]);
+    return rows[0];
+};
+
+export const findLenderRelationsByType = async (lenderId, relationType) => {
+    const query = `
+    SELECT rl.id, rl.lender_name,
+      CONCAT('/file/image/', img.id, img.file_extension) AS image_link
+    FROM other_lender ol
+    JOIN lender rl ON ol.related_lender_id = rl.id
+    LEFT JOIN files img ON rl.image_id = img.id::uuid
+    WHERE ol.lender_id = $1 AND ol.relation_type = $2 AND rl.is_deleted = FALSE
+  `;
+
+    const { rows } = await pool.query(query, [lenderId, relationType]);
+
+    return rows;
 };
