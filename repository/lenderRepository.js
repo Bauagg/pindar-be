@@ -103,3 +103,32 @@ export const softDeleteLender = async (client, lenderId, userEmail) => {
         [userEmail, lenderId]
     );
 };
+
+export const fetchLenders = async (limit, offset, search, sortBy, sortDirection) => {
+    const client = await pool.connect();
+
+    try {
+        const searchQuery = `%${search}%`;
+        const lendersResult = await client.query(
+            `SELECT l.lender_name, CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, l.max_tenor AS maxTenor, l.max_loan AS maxLoan
+             FROM lender l
+                      LEFT JOIN files f ON l.image_id = f.id
+             WHERE l.is_deleted = FALSE AND l.lender_name ILIKE $1
+             ORDER BY ${sortBy} ${sortDirection}
+                 LIMIT $2 OFFSET $3`,
+            [searchQuery, limit, offset]
+        );
+
+        const totalResult = await client.query(
+            `SELECT COUNT(*) FROM lender WHERE is_deleted = FALSE AND lender_name ILIKE $1`,
+            [searchQuery]
+        );
+
+        return {
+            lenders: lendersResult.rows,
+            total: parseInt(totalResult.rows[0].count, 10)
+        };
+    } finally {
+        client.release();
+    }
+};
