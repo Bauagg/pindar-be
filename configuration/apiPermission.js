@@ -4,5 +4,6 @@ export const apiPermissions = {
     "/api/user/profile": ["CUSTOMER"],
     "/api/auth/logout": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/file/image": ["ADMIN", "CUSTOMER", "CREATE"],
-    "/api/lender/add": ["ADMIN", "CUSTOMER", "CREATE"]
+    "/api/lender/add": ["ADMIN", "CUSTOMER", "CREATE"],
+    "/api/lender/update": ["ADMIN", "CUSTOMER", "CREATE"]
 };

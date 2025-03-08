@@ -58,3 +58,41 @@ export const addLenderTransaction = async (data) => {
         client.release();
     }
 };
+
+export const updateLenderById = async (client, data) => {
+    await client.query(
+        `UPDATE lender SET lender_name=$1, direct_link=$2, max_loan=$3, max_tenor=$4, loan_type=$5, image_id=$6, updated_by=$7, updated_date=NOW()
+         WHERE id=$8`,
+        [data.lenderName, data.directLink, data.maxLoan, data.maxTenor, data.loanType, data.imageId, data.userEmail, data.id]
+    );
+};
+
+export const updateLenderDetailById = async (client, data) => {
+    await client.query(
+        `UPDATE lender_detail SET additional_information=$1, terms_document=$2 WHERE lender_id=$3`,
+        [data.additionalInformation, data.termsDocument, data.id]
+    );
+};
+
+export const updateFileUsage = async (client, imageId) => {
+    await client.query('UPDATE files SET is_used = true WHERE id = $1', [imageId]);
+};
+
+export const deleteOtherLenders = async (client, lenderId) => {
+    await client.query('DELETE FROM other_lender WHERE lender_id = $1', [lenderId]);
+};
+
+export const insertOtherLender = async (client, lenderId, relatedIds, type) => {
+    for (const relatedId of relatedIds) {
+        await client.query(
+            `INSERT INTO other_lender (lender_id, related_lender_id, relation_type)
+             VALUES ($1, $2, $3)`,
+            [lenderId, relatedId, type]
+        );
+    }
+};
+
+export const checkLenderExists = async (client, lenderId) => {
+    const result = await client.query('SELECT id FROM lender WHERE id = $1', [lenderId]);
+    return result.rowCount > 0;
+};
