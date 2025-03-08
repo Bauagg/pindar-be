@@ -24,10 +24,11 @@ CREATE TABLE lender_detail (
 
 -- Other Lender Table (Many-to-Many Self-Relation)
 CREATE TABLE other_lender (
+                              id UUID NOT null DEFAULT uuid_generate_v4(),
                               lender_id UUID NOT NULL,
                               related_lender_id UUID NOT NULL,
                               relation_type TEXT NOT NULL,
-                              PRIMARY KEY (lender_id, related_lender_id),
+                              PRIMARY KEY (id),
                               FOREIGN KEY (lender_id) REFERENCES lender(id) ON DELETE CASCADE,
                               FOREIGN KEY (related_lender_id) REFERENCES lender(id) ON DELETE CASCADE
 );
