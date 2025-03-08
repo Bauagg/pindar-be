@@ -50,6 +50,7 @@ CREATE TABLE parameters (
         param_key VARCHAR(255) UNIQUE NOT NULL,
         param_value TEXT NOT NULL,
         description TEXT,
+        is_fetchable BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
