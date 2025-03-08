@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import {apiPermissions} from "../configuration/apiPermission.js";
+import { match } from 'path-to-regexp';
 
 dotenv.config();
 
@@ -8,10 +9,13 @@ export const authenticateAndAuthorize = (req, res, next) => {
     try {
         const authHeader = req.headers["Authorization"] || req.headers["authorization"];
         const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
-        const requestPath = req.path;
 
-        // Check if the API path has defined permissions
-        const allowedRoles = apiPermissions[requestPath];
+        const matchedPath = Object.keys(apiPermissions).find(pathPattern => {
+            const matcher = match(pathPattern, { decode: decodeURIComponent });
+            return matcher(req.path);
+        });
+
+        const allowedRoles = apiPermissions[matchedPath];
 
         if (!allowedRoles) {
             // If API is not listed in config, it's public and doesn't require authentication

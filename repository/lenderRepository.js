@@ -96,3 +96,10 @@ export const checkLenderExists = async (client, lenderId) => {
     const result = await client.query('SELECT id FROM lender WHERE id = $1', [lenderId]);
     return result.rowCount > 0;
 };
+
+export const softDeleteLender = async (client, lenderId, userEmail) => {
+    await client.query(
+        `UPDATE lender SET is_deleted = TRUE, updated_by = $1, updated_date = NOW() WHERE id = $2`,
+        [userEmail, lenderId]
+    );
+};
