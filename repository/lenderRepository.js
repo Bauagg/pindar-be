@@ -29,24 +29,50 @@ export const softDeleteLender = async (client, lenderId, userEmail) => {
     );
 };
 
-export const fetchLenders = async (limit, offset, search, sortBy, sortDirection) => {
+export const fetchLenders = async (limit, offset, search, sortBy, sortDirection, loanType, paymentType) => {
     const client = await pool.connect();
 
     try {
-        const searchQuery = `%${search}%`;
+        let paramIndex = 1;
+        const queryParams = [];
+        let filterConditions = "l.is_deleted = FALSE";
+
+        if (search) {
+            filterConditions += ` AND LOWER(l.lender_name) LIKE LOWER($${paramIndex})`;
+            queryParams.push(`%${search}%`);
+            paramIndex++;
+        }
+
+        if (loanType) {
+            filterConditions += ` AND LOWER(l.loan_type) = LOWER($${paramIndex})`;
+            queryParams.push(loanType);
+            paramIndex++;
+        }
+
+        if (paymentType) {
+            filterConditions += ` AND LOWER(l.payment_type) = LOWER($${paramIndex})`;
+            queryParams.push(paymentType);
+            paramIndex++;
+        }
+
+        // Query for paginated results
         const lendersResult = await client.query(
-            `SELECT l.id, l.lender_name, CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, l.max_tenor AS maxTenor, l.max_loan AS maxLoan
-             FROM lender l
-                      LEFT JOIN files f ON l.image_id = f.id
-             WHERE l.is_deleted = FALSE AND l.lender_name ILIKE $1
-             ORDER BY ${sortBy} ${sortDirection}
-                 LIMIT $2 OFFSET $3`,
-            [searchQuery, limit, offset]
+            `SELECT l.id, l.lender_name, 
+              CONCAT('/api/file/image/', f.id, '.', f.file_extension) AS imageLink, 
+              l.max_tenor AS maxTenor, 
+              l.max_loan AS maxLoan
+       FROM lender l
+       LEFT JOIN files f ON l.image_id = f.id
+       WHERE ${filterConditions}
+       ORDER BY ${sortBy} ${sortDirection}
+       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+            [...queryParams, limit, offset] // Add limit & offset at the end
         );
 
+        // Query for total count (WITHOUT LIMIT & OFFSET)
         const totalResult = await client.query(
-            `SELECT COUNT(*) FROM lender WHERE is_deleted = FALSE AND lender_name ILIKE $1`,
-            [searchQuery]
+            `SELECT COUNT(*) FROM lender l WHERE ${filterConditions}`,
+            queryParams // Use only the filtering parameters
         );
 
         return {

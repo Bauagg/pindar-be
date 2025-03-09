@@ -27,12 +27,30 @@ export const deleteLender = async (req, res, next) => {
 
 export const listLenders = async (req, res, next) => {
     try {
-        const { limit, offset, search, sortBy, sortDirection } = req.query;
-        const result = await getLenders({ limit, offset, search, sortBy, sortDirection });
+        const {
+            loanType = "",
+            paymentType = "",
+            limit = 10,
+            offset = 0,
+            search = "",
+            sortBy = "lender_name",
+            sortDirection = "asc"
+        } = req.query;
+
+        const lenders = await getLenders({
+            loanType,
+            paymentType,
+            limit: parseInt(limit, 10),
+            offset: parseInt(offset, 10),
+            search,
+            sortBy,
+            sortDirection
+        });
+
         res.status(200).json({
             code: 200,
-            message: 'Lender list retrieved successfully.',
-            data: result
+            message: "Lender list retrieved successfully.",
+            data: lenders
         });
     } catch (err) {
         next(err);
