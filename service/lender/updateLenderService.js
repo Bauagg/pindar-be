@@ -1,64 +1,43 @@
 import pool from "../../configuration/dbConfiguration.js";
 import {
-    checkLenderExists,
-    deleteOtherLenders, insertOtherLender,
-    updateFileUsage,
-    updateLenderById,
-    updateLenderDetailById
+    deleteOtherLenderRelations, insertOtherLender, updateFileUsage,
+    updateLenderData,
+    updateLenderDetail,
+    validateLenderExists,
+    validateParamExist
 } from "../../repository/lenderRepository.js";
 
-export const modifyLender = async (body, userEmail) => {
-    const {
-        id,
-        lenderName,
-        directLink,
-        maxLoan,
-        loanType,
-        maxTenor,
-        additionalInformation,
-        termsDocument,
-        anotherLend = [],
-        anotherLenderType = [],
-        imageId
-    } = body;
 
-    if (!id || !lenderName || !directLink || !maxLoan || !loanType || !additionalInformation || !termsDocument) {
-        throw { status: 400, message: 'Required fields missing or invalid' };
-    }
+export const modifyLender = async (data, userEmail) => {
+    const { id, lenderName, directLink, maxLoan, loanType, paymentType, maxTenor,
+        additionalInformation, termsDocument, imageId, anotherLend, anotherLenderType } = data;
 
-    if (loanType === 'with tenor' && (!maxTenor || maxTenor <= 0)) {
-        throw { status: 400, message: 'Invalid maxTenor' };
+    if (!id || !lenderName || !directLink || !maxLoan || !loanType || !paymentType || !maxTenor || !imageId) {
+        throw { status: 400, message: 'Missing required fields.' };
     }
 
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
-        await updateLenderById(client, { id, lenderName, directLink, maxLoan, maxTenor, loanType, imageId, userEmail });
-        await updateLenderDetailById(client, { id, additionalInformation, termsDocument });
+        await validateLenderExists(client, id);
+        await validateParamExist(client, loanType, 'LENDER_LOAN_TYPE');
+        await validateParamExist(client, paymentType, 'LENDER_PAYMENT_TYPE');
 
-        if (imageId) {
-            await updateFileUsage(client, imageId);
-        }
+        await updateLenderData(client, { id, lenderName, directLink, maxLoan, loanType, paymentType, maxTenor, imageId, userEmail });
+        await updateLenderDetail(client, { id, additionalInformation, termsDocument });
 
-        await deleteOtherLenders(client, id);
-
-        for (const relatedId of [...anotherLend, ...anotherLenderType]) {
-            const exists = await checkLenderExists(client, relatedId);
-            if (!exists) {
-                throw { status: 400, message: `Invalid lender ID: ${relatedId}` };
-            }
-        }
-
+        await deleteOtherLenderRelations(client, id);
         await insertOtherLender(client, id, anotherLend, 'ANOTHER');
         await insertOtherLender(client, id, anotherLenderType, 'ANOTHER_TYPE');
 
-        await client.query('COMMIT');
+        await updateFileUsage(client, imageId);
 
+        await client.query('COMMIT');
         return { id };
-    } catch (err) {
+    } catch (error) {
         await client.query('ROLLBACK');
-        throw err;
+        throw error;
     } finally {
         client.release();
     }

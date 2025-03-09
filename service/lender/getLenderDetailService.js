@@ -15,10 +15,11 @@ export const getLenderDetailById = async (lenderId) => {
         maxLoan: lender.max_loan,
         maxTenor: lender.max_tenor,
         loanType: lender.loan_type,
+        typeLoanTotal: lender.type_loan_total,
+        paymentType: lender.payment_type_name,
         additionalInformation: lender.additional_information,
         termsDocument: lender.terms_document,
         imageLink: lender.image_link,
-        typeLoanTotal: lender.type_loan_total,
         otherLenders: {
             another,
             anotherType,

@@ -1,29 +1,19 @@
-import {createLender} from "../service/lender/createLenderService.js";
+import {addLenderService} from "../service/lender/createLenderService.js";
 import {modifyLender} from "../service/lender/updateLenderService.js";
 import {removeLender} from "../service/lender/deleteLenderService.js";
 import {getLenders} from "../service/lender/searchLenderService.js";
 import {getLenderDetailById} from "../service/lender/getLenderDetailService.js";
 import {fetchLenderDropdown} from "../service/lender/getLenderDropdownService.js";
 
-export const addLender = async (req, res, next) => {
+export const updateLender = async (req, res, next) => {
     try {
         const userEmail = req.user.email;
-        const result = await createLender(req.body, userEmail);
-        res.status(200).json({ code: 200, message: 'Success', data: result });
+        const lender = await modifyLender(req.body, userEmail);
+        res.status(200).json({ code: 200, message: 'Lender updated successfully.', data: lender });
     } catch (err) {
         next(err);
     }
 };
-
-export const updateLender = async (req, res, next) => {
-    try {
-        const userEmail = req.user.email;
-        const result = await modifyLender(req.body, userEmail);
-        res.status(200).json({ code: 200, message: 'Success', data: result });
-    } catch (err) {
-        next(err);
-    }
-}
 export const deleteLender = async (req, res, next) => {
     try {
         const lenderId = req.params.id;
@@ -72,6 +62,16 @@ export const getLenderDropdown = async (req, res, next) => {
             message: 'Lender dropdown retrieved successfully.',
             data: lenders,
         });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const addLender = async (req, res, next) => {
+    try {
+        const userEmail = req.user.email;
+        const lender = await addLenderService(req.body, userEmail);
+        res.status(201).json({ code: 201, message: 'Lender created successfully.', data: lender });
     } catch (err) {
         next(err);
     }
