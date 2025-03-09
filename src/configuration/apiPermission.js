@@ -6,5 +6,6 @@ export const apiPermissions = {
     "/api/file/image": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/lender/add": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/lender/update": ["ADMIN", "CUSTOMER", "CREATE"],
-    "/api/lender/delete/:id": ["ADMIN", "CUSTOMER", "CREATE"]
+    "/api/lender/delete/:id": ["ADMIN", "CUSTOMER", "CREATE"],
+    "/api/content/comment/:id": ["ADMIN", "CUSTOMER", "CREATE"]
 };

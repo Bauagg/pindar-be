@@ -9,6 +9,7 @@ CREATE TABLE content_category (
 CREATE TABLE content (
                          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                          title TEXT NOT NULL,
+                        image_id TEXT,
                          category_id UUID NOT NULL REFERENCES content_category(id) ON DELETE CASCADE,
                          content_detail TEXT NOT NULL,
                          link_path TEXT NOT NULL,

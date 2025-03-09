@@ -7,6 +7,7 @@ const lenderRoute = require("./route/lenderRoute.js");
 const parameterRoute = require("./route/parameterRoute.js");
 const faqRoute = require("./route/faqRoute.js");
 const creditCardRoute = require("./route/creditCardRoute.js");
+const contentRoute = require("./route/contentRoute.js");
 const {errorHandler} = require("./middleware/errorHandler.js");
 const {authenticateAndAuthorize} = require("./middleware/authMiddleware.js");
 
@@ -21,6 +22,7 @@ app.use("/api/lender", lenderRoute);
 app.use("/api/parameter", parameterRoute);
 app.use("/api/faq", faqRoute);
 app.use("/api/credit-card", creditCardRoute);
+app.use("/api/content", contentRoute);
 app.use(errorHandler);
 
 module.exports = app;
