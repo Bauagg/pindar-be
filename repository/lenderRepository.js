@@ -156,7 +156,7 @@ export const findLenderById = async (id) => {
             p.param_value AS payment_type_name,
             ld.additional_information,
             ld.terms_document,
-            CONCAT('/file/image/', f.id, '.', f.file_extension) AS image_link
+            CONCAT('/file/image/', f.id, f.file_extension) AS image_link
         FROM lender l
                  LEFT JOIN lender_detail ld ON l.id = ld.lender_id
                  LEFT JOIN files f ON l.image_id = f.id::uuid
@@ -172,7 +172,7 @@ export const findLenderById = async (id) => {
 export const findLenderRelationsByType = async (lenderId, relationType) => {
     const { rows } = await pool.query(`
     SELECT rl.id, rl.lender_name,
-      CONCAT('/file/image/', img.id, '.', img.file_extension) AS image_link
+      CONCAT('/file/image/', img.id, img.file_extension) AS image_link
     FROM other_lender ol
     JOIN lender rl ON ol.related_lender_id = rl.id
     LEFT JOIN files img ON rl.image_id = img.id::uuid
