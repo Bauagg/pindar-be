@@ -2,7 +2,7 @@ import {
     addComment,
     fetchCommentList,
     fetchCommentReplies,
-    fetchCommentsByContentId, removeComment
+    fetchCommentsByContentId, removeComment, toggleCommentLike
 } from "../service/content/commentService.js";
 
 
@@ -27,7 +27,10 @@ export const createComment = async (req, res, next) => {
 export const getCommentsByContentId = async (req, res, next) => {
     try {
         const { contentId } = req.params;
-        const comments = await fetchCommentsByContentId(contentId);
+        const userId = req.user ? req.user.id : null; // Extract user ID if authenticated
+        const { limit = 10, offset = 0, sortBy = 'created_date', sortDirection = 'asc' } = req.query;
+
+        const comments = await fetchCommentsByContentId(contentId, userId, parseInt(limit, 10), parseInt(offset, 10), sortBy, sortDirection);
 
         res.status(200).json({ code: 200, message: 'Comments retrieved successfully.', data: comments });
     } catch (err) {
@@ -38,8 +41,10 @@ export const getCommentsByContentId = async (req, res, next) => {
 export const getCommentList = async (req, res, next) => {
     try {
         const { contentId } = req.params;
+        const userId = req.user ? req.user.id : null;
         const { limit = 10, offset = 0, sortBy = 'created_date', sortDirection = 'desc' } = req.query;
-        const comments = await fetchCommentList(contentId, parseInt(limit, 10), parseInt(offset, 10), sortBy, sortDirection);
+
+        const comments = await fetchCommentList(contentId, userId, parseInt(limit, 10), parseInt(offset, 10), sortBy, sortDirection);
 
         res.status(200).json({ code: 200, message: 'First-tier comments retrieved successfully.', data: comments });
     } catch (err) {
@@ -50,8 +55,10 @@ export const getCommentList = async (req, res, next) => {
 export const getCommentReplies = async (req, res, next) => {
     try {
         const { commentId } = req.params;
+        const userId = req.user ? req.user.id : null;
         const { limit = 10, offset = 0, sortBy = 'created_date', sortDirection = 'asc' } = req.query;
-        const replies = await fetchCommentReplies(commentId, parseInt(limit, 10), parseInt(offset, 10), sortBy, sortDirection);
+
+        const replies = await fetchCommentReplies(commentId, userId, parseInt(limit, 10), parseInt(offset, 10), sortBy, sortDirection);
 
         res.status(200).json({ code: 200, message: 'Comment replies retrieved successfully.', data: replies });
     } catch (err) {
@@ -59,12 +66,30 @@ export const getCommentReplies = async (req, res, next) => {
     }
 };
 
+
 export const deleteComment = async (req, res, next) => {
     try {
         const { id } = req.params;
 
         await removeComment(id);
         res.status(200).json({ code: 200, message: 'Comment deleted successfully.' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const likeOrUnlikeComment = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { commentId } = req.params;
+
+        const result = await toggleCommentLike(commentId, userId);
+
+        res.status(200).json({
+            code: 200,
+            message: result.liked ? 'Comment liked successfully.' : 'Like removed successfully.',
+            data: result
+        });
     } catch (err) {
         next(err);
     }

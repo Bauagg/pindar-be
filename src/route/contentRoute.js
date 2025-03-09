@@ -5,6 +5,7 @@ const {createContentCategory, getContentCategories, bulkCreateContentCategories,
     updateContentCategory, deleteContentCategory
 } = require("../controller/contentCategoryController.js");
 const {createComment, getCommentsByContentId, getCommentList, getCommentReplies, deleteComment} = require("../controller/commentController.js");
+const {likeOrUnlikeComment} = require("../controller/commentController.js");
 const router = express.Router();
 
 router.post('/create', createContent);
@@ -25,5 +26,8 @@ router.post('/comment/:contentId', createComment);
 router.get('/comment/list/:contentId', getCommentList);
 router.get('/comment/replies/:commentId', getCommentReplies);
 router.delete('/comment/:id', deleteComment);
+
+router.post('/comment/like/:commentId', likeOrUnlikeComment); // ✅ Like/Unlike in one API
+
 
 module.exports = router;
