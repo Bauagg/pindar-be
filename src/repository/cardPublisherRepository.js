@@ -41,3 +41,27 @@ export const softDeleteCardPublisherById = async (id) => {
         [id]
     );
 };
+
+export const insertBulkCardPublishers = async (publishers) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const values = publishers.map((p, index) => `($${index * 2 + 1}, $${index * 2 + 2})`).join(",");
+        const params = publishers.flatMap(p => [p.number, p.publisherName]);
+
+        const { rows } = await client.query(
+            `INSERT INTO card_publisher (number, publisher_name) 
+       VALUES ${values} RETURNING *`,
+            params
+        );
+
+        await client.query('COMMIT');
+        return rows;
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+};

@@ -1,6 +1,6 @@
 import {
     getAllCardPublishers,
-    getCardPublisherById,
+    getCardPublisherById, insertBulkCardPublishers,
     insertCardPublisher, softDeleteCardPublisherById, updateCardPublisherById
 } from "../../repository/cardPublisherRepository.js";
 
@@ -36,4 +36,12 @@ export const modifyCardPublisher = async (id, data) => {
 
 export const softDeleteCardPublisher = async (id) => {
     await softDeleteCardPublisherById(id);
+};
+
+export const addBulkCardPublishers = async (publishers) => {
+    if (!Array.isArray(publishers.publishers) || publishers.publishers.length === 0) {
+        throw { status: 400, message: 'Invalid input, expected an array of publishers.' };
+    }
+
+    return await insertBulkCardPublishers(publishers.publishers);
 };
