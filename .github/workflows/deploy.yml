@@ -24,8 +24,11 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
             cd ${DEPLOY_PATH}/backend && \
-            git pull origin main && \
+            git update-index --skip-worktree .env && \
+            git fetch origin main && \
+            git reset --hard origin/main && \
             cd ${DEPLOY_PATH} && \
+            docker compose down backend && \
             docker compose up -d --build backend && \
             echo 'Waiting for container to start...' && \
             sleep 10 && \
