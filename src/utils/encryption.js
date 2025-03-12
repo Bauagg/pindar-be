@@ -18,7 +18,7 @@ export const decryptPassword = (encryptedPassword) => {
     return decrypted.toString("utf8");
 };
 
-export const hashPassword = async (email, decryptedPassword) => {
+export const hashPassword = async (decryptedPassword) => {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(decryptedPassword, salt);
 };

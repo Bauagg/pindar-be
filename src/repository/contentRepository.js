@@ -37,7 +37,7 @@ export const insertBulkContent = async (contents) => {
 export const getContentById = async (id) => {
     const { rows } = await pool.query(
         `SELECT c.id, c.title, cc.name AS category_name, c.content_detail, c.link_path,
-            CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, '.', f.file_extension) ELSE NULL END AS image_link
+            CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
      FROM content c
      JOIN content_category cc ON c.category_id = cc.id
      LEFT JOIN files f ON c.image_id = f.id

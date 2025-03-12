@@ -9,6 +9,6 @@ export const apiPermissions = {
     "/api/lender/delete/:id": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/content/comment/:id": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/content/comment/like/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
-    "/api/content/comment/replies/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
-    "/api/content/comment/list/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
+    // "/api/content/comment/replies/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
+    // "/api/content/comment/list/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
 };

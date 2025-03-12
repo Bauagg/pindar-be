@@ -23,15 +23,15 @@ export const signUp = async (req, res, next) => {
 
 export const confirmOtp = async (req, res, next) => {
     try {
-        const { email, otp_code } = req.body;
+        const { email, otpCode } = req.body;
 
-        if (!email || !otp_code) {
+        if (!email || !otpCode) {
             const error = new Error("Email and OTP code are required.");
             error.status = 400;
             throw error;
         }
 
-        const response = await confirmOtpService(email, otp_code);
+        const response = await confirmOtpService(email, otpCode);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);

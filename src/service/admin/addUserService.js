@@ -33,7 +33,7 @@ export const addUserService = async (full_name, email, encryptedPassword, roles)
 
         // Decrypt and hash password
         const decryptedPassword = decryptPassword(encryptedPassword);
-        const hashedPassword = await hashPassword(email, decryptedPassword);
+        const hashedPassword = await hashPassword(decryptedPassword);
 
         let userId;
         if (!existingUser) {

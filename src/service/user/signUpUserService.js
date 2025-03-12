@@ -8,8 +8,8 @@ import { getParameter } from "../../repository/parameterRepository.js";
 import bcrypt from "bcryptjs";
 import pool from "../../configuration/dbConfiguration.js";
 
-export const signUpUser = async ({ full_name, email, phone_number, password }) => {
-    if (!full_name || !email || !phone_number || !password) {
+export const signUpUser = async ({ fullName, email, phoneNumber, password }) => {
+    if (!fullName || !email || !phoneNumber || !password) {
         const error = new Error("Invalid input data.");
         error.status = 400;
         throw error;
@@ -28,11 +28,11 @@ export const signUpUser = async ({ full_name, email, phone_number, password }) =
         }
 
         const decryptedPassword = decryptPassword(password);
-        const hashedPassword = await hashPassword(email, decryptedPassword);
+        const hashedPassword = await hashPassword(decryptedPassword);
 
         let userId;
         if (!existingUser) {
-            userId = await userRepository(full_name, email, phone_number, hashedPassword, client);
+            userId = await userRepository(fullName, email, phoneNumber, hashedPassword, client);
         } else {
             userId = existingUser.id;
         }
@@ -51,7 +51,7 @@ export const signUpUser = async ({ full_name, email, phone_number, password }) =
         return {
             code: 201,
             message: "User registered, OTP sent.",
-            data: { userId, email, otp_expiry: expiresAt }
+            data: { userId, email, otpExpiry: expiresAt }
         };
     } catch (error) {
         await client.query("ROLLBACK");
