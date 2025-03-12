@@ -1,9 +1,16 @@
-const express = require("express");
-const {signUp, confirmOtp, loginUser, listCustomers, updateCustomerStatus, updateCustomer, changePassword,
+import express from "express";
+import {
+    signUp,
+    confirmOtp,
+    loginUser,
+    listCustomers,
+    updateCustomerStatus,
+    updateCustomer,
+    changePassword,
     getCustomerDetail
-} = require("../controller/userController");
-const router = express.Router();
+} from "../controller/userController.js"; // Ensure .js extension is included
 
+const router = express.Router();
 
 router.get("/list", listCustomers);
 router.post("/sign-up", signUp);
@@ -14,4 +21,4 @@ router.put("/update", updateCustomer);
 router.put("/change-password", changePassword);
 router.get("/profile", getCustomerDetail);
 
-module.exports = router;
+export default router; // ✅ Use ES module export instead of module.exports

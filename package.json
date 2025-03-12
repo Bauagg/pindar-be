@@ -32,5 +32,6 @@
     "eslint": "^9.21.0",
     "globals": "^16.0.0",
     "nodemon": "^3.1.9"
-  }
+  },
+  "type": "module"
 }

@@ -1,15 +1,15 @@
-const express = require("express");
-const userRoute = require("./route/userRoute.js");
-const authRoute = require("./route/accessRoute.js");
-const adminRoute = require("./route/adminRoute.js");
-const fileRoute = require("./route/fileRoute.js");
-const lenderRoute = require("./route/lenderRoute.js");
-const parameterRoute = require("./route/parameterRoute.js");
-const faqRoute = require("./route/faqRoute.js");
-const creditCardRoute = require("./route/creditCardRoute.js");
-const contentRoute = require("./route/contentRoute.js");
-const {errorHandler} = require("./middleware/errorHandler.js");
-const {authenticateAndAuthorize} = require("./middleware/authMiddleware.js");
+import express from "express";
+import userRoute from "./route/userRoute.js";
+import authRoute from "./route/accessRoute.js";
+import adminRoute from "./route/adminRoute.js";
+import fileRoute from "./route/fileRoute.js";
+import lenderRoute from "./route/lenderRoute.js";
+import parameterRoute from "./route/parameterRoute.js";
+import faqRoute from "./route/faqRoute.js";
+import creditCardRoute from "./route/creditCardRoute.js";
+import contentRoute from "./route/contentRoute.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { authenticateAndAuthorize } from "./middleware/authMiddleware.js";
 
 const app = express();
 app.use(express.json());
@@ -25,4 +25,4 @@ app.use("/api/credit-card", creditCardRoute);
 app.use("/api/content", contentRoute);
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

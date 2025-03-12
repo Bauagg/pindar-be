@@ -1,5 +1,13 @@
-const express = require("express");
-const {adminSignIn, addUser, updateUser, deleteUser, listUsers, getUserDetail} = require("../controller/adminController");
+import express from "express";
+import {
+    adminSignIn,
+    addUser,
+    updateUser,
+    deleteUser,
+    listUsers,
+    getUserDetail
+} from "../controller/adminController.js";
+
 const router = express.Router();
 
 router.post("/sign-in", adminSignIn);
@@ -9,4 +17,4 @@ router.delete("/delete", deleteUser);
 router.get("/list", listUsers);
 router.get("/detail/:id", getUserDetail);
 
-module.exports = router;
+export default router;

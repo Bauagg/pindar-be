@@ -1,8 +1,8 @@
-const express = require("express");
-const {getParametersByGroup} = require("../controller/parameterController.js");
+import express from "express";
+import { getParametersByGroup } from "../controller/parameterController.js";
+
 const router = express.Router();
 
+router.get("/group/:group", getParametersByGroup);
 
-router.get('/group/:group', getParametersByGroup);
-
-module.exports = router;
+export default router;

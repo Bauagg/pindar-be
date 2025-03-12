@@ -1,4 +1,6 @@
-import nodemailer from "nodemailer";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const nodemailer = require("nodemailer");
 import { smtpConfig } from "../../configuration/smtpConfiguration.js";
 import { validateUser } from "../../utils/validation.js";
 import { decryptPassword, hashPassword } from "../../utils/encryption.js";
