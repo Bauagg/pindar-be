@@ -51,3 +51,7 @@ CREATE TABLE credit_card_detail (
                                     bill_payment_tutorial TEXT NOT NULL
 );
 
+CREATE TABLE credit_card_features (
+                                      credit_card_id UUID NOT NULL REFERENCES credit_card(id) ON DELETE CASCADE,
+                                      feature TEXT NOT NULL
+);

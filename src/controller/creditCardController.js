@@ -11,6 +11,12 @@ import {
     fetchCardFeatures,
     modifyCardFeature, removeCardFeature
 } from "../service/creditcard/cardFeatureService.js";
+import {
+    addCreditCard,
+    fetchCreditCardById,
+    fetchCreditCardList,
+    modifyCreditCard, removeCreditCard
+} from "../service/creditcard/creditCardService.js";
 
 
 export const createCardPublisher = async (req, res, next) => {
@@ -122,6 +128,59 @@ export const bulkCreateCardPublishers = async (req, res, next) => {
     try {
         const publishers = await addBulkCardPublishers(req.body);
         res.status(201).json({ code: 201, message: 'Card publishers created successfully.', data: publishers });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const createCreditCard = async (req, res, next) => {
+    try {
+        const createdBy = req.user.email; // Extract from JWT middleware
+        const creditCard = await addCreditCard({ ...req.body, createdBy });
+
+        res.status(201).json({ code: 201, message: 'Credit card created successfully.', data: creditCard });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getCreditCardById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const creditCard = await fetchCreditCardById(id);
+        res.status(200).json({ code: 200, message: 'Credit card retrieved successfully.', data: creditCard });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const getCreditCardList = async (req, res, next) => {
+    try {
+        const { limit = 10, offset = 0, search = '' } = req.query;
+        const creditCards = await fetchCreditCardList(parseInt(limit, 10), parseInt(offset, 10), search);
+        res.status(200).json({ code: 200, message: 'Credit card list retrieved successfully.', data: creditCards });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateCreditCard = async (req, res, next) => {
+    try {
+        const updatedBy = req.user.email; // Extract from JWT middleware
+        const { id } = req.params;
+        const updatedCard = await modifyCreditCard(id, { ...req.body, updatedBy });
+
+        res.status(200).json({ code: 200, message: 'Credit card updated successfully.', data: updatedCard });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const deleteCreditCard = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await removeCreditCard(id);
+        res.status(200).json({ code: 200, message: 'Credit card deleted successfully.' });
     } catch (err) {
         next(err);
     }

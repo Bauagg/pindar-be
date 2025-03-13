@@ -11,7 +11,7 @@ import {
     updateCardFeature,
     deleteCardFeature,
     bulkCreateCardFeatures,
-    bulkCreateCardPublishers
+    bulkCreateCardPublishers, createCreditCard, getCreditCardById, getCreditCardList, updateCreditCard, deleteCreditCard
 } from "../controller/creditCardController.js";
 
 const router = express.Router();
@@ -29,5 +29,11 @@ router.get("/card-feature/:id", getCardFeatureById);
 router.put("/card-feature/:id", updateCardFeature);
 router.delete("/card-feature/:id", deleteCardFeature);
 router.post("/card-feature/bulk", bulkCreateCardFeatures);
+
+router.post('/', createCreditCard);
+router.get('/:id', getCreditCardById);
+router.get('/', getCreditCardList);
+router.put('/update/:id', updateCreditCard);
+router.delete('/:id', deleteCreditCard);
 
 export default router;
