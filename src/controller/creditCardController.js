@@ -14,7 +14,7 @@ import {
 import {
     addCreditCard,
     fetchCreditCardById,
-    fetchCreditCardList,
+    fetchCreditCardList, fetchCreditCards,
     modifyCreditCard, removeCreditCard
 } from "../service/creditcard/creditCardService.js";
 
@@ -181,6 +181,30 @@ export const deleteCreditCard = async (req, res, next) => {
         const { id } = req.params;
         await removeCreditCard(id);
         res.status(200).json({ code: 200, message: 'Credit card deleted successfully.' });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const searchCreditCards = async (req, res, next) => {
+    try {
+        const {
+            publisherId, featureId, minYearlyFee, maxYearlyFee,
+            minYearlyIncome, maxYearlyIncome, sortBy = 'title',
+            sortDirection = 'asc', limit = 10, offset = 0
+        } = req.query;
+
+        const creditCards = await fetchCreditCards({
+            publisherId, featureId, minYearlyFee, maxYearlyFee,
+            minYearlyIncome, maxYearlyIncome, sortBy, sortDirection,
+            limit: parseInt(limit, 10), offset: parseInt(offset, 10)
+        });
+
+        res.status(200).json({
+            code: 200,
+            message: 'Credit card list retrieved successfully.',
+            data: creditCards
+        });
     } catch (err) {
         next(err);
     }

@@ -7,7 +7,7 @@ export const insertCreditCard = async (data) => {
         await client.query('BEGIN');
 
         const { rows } = await client.query(
-            `INSERT INTO credit_card (image_id, publisher_id, feature_type_id, reward_or_fee, detail_reward_or_fee, title, 
+            `INSERT INTO credit_card (image_id, publisher_id, feature_type_id, yearly_fee, detail_yearly_fee, title, 
                                 additional_card_annual_fee, purchase_rate, cashback_rate, detail_cashback_rate, 
                                 minimum_withdraw, monthly_income_minimum, who_can_register, must_have_credit_card, 
                                 created_by, yearly_income_minimum) 
@@ -51,7 +51,7 @@ export const insertCreditCard = async (data) => {
 
 export const getCreditCardById = async (id) => {
     const { rows } = await pool.query(
-        `SELECT c.id, c.title, c.reward_or_fee, c.purchase_rate, c.cashback_rate, c.monthly_income_minimum, c.yearly_income_minimum,
+        `SELECT c.id, c.title, c.yearly_fee, c.purchase_rate, c.cashback_rate, c.monthly_income_minimum, c.yearly_income_minimum,
                 cd.additional_information, cd.terms_document, cd.product_description, cd.bill_payment_tutorial,
                 cp.id AS publisher_id, cp.publisher_name,
                 cf.id AS type_id, cf.feature_name AS type_name,
@@ -88,8 +88,8 @@ export const updateCreditCardById = async (id, data) => {
         // ✅ Update credit card details
         await client.query(
             `UPDATE credit_card 
-             SET image_id = $1, publisher_id = $2, feature_type_id = $3, reward_or_fee = $4, 
-                 detail_reward_or_fee = $5, title = $6, additional_card_annual_fee = $7, 
+             SET image_id = $1, publisher_id = $2, feature_type_id = $3, yearly_fee = $4, 
+                 detail_yearly_fee = $5, title = $6, additional_card_annual_fee = $7, 
                  purchase_rate = $8, cashback_rate = $9, detail_cashback_rate = $10, 
                  minimum_withdraw = $11, monthly_income_minimum = $12, who_can_register = $13, 
                  must_have_credit_card = $14, updated_by = $15, updated_date = NOW(), yearly_income_minimum = $17
@@ -148,7 +148,7 @@ export const getCreditCardList = async (limit, offset, search) => {
     const searchQuery = `%${search}%`;
 
     const { rows } = await pool.query(
-        `SELECT c.id, c.title, c.reward_or_fee AS yearly_fee, c.cashback_rate AS cashback,
+        `SELECT c.id, c.title, c.yearly_fee AS yearly_fee, c.cashback_rate AS cashback,
             ROW_NUMBER() OVER (ORDER BY c.created_date DESC) AS row_number,
             CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id) ELSE NULL END AS image_link
      FROM credit_card c
@@ -190,3 +190,78 @@ export const checkFeatureExists = async (featureId) => {
     );
     return rows.length > 0;
 };
+
+export const getCreditCards = async ({
+                                         publisherId, featureId, minYearlyFee, maxYearlyFee,
+                                         minYearlyIncome, maxYearlyIncome, sortBy, sortDirection,
+                                         limit, offset
+                                     }) => {
+    const queryParams = [];
+    let filterQuery = '';
+
+    if (publisherId) {
+        queryParams.push(publisherId);
+        filterQuery += ` AND c.publisher_id = $${queryParams.length}`;
+    }
+
+    if (featureId) {
+        queryParams.push(featureId);
+        filterQuery += ` AND c.feature_type_id = $${queryParams.length}`;
+    }
+
+    if (minYearlyFee) {
+        queryParams.push(minYearlyFee);
+        filterQuery += ` AND c.yearly_fee >= $${queryParams.length}`;
+    }
+
+    if (maxYearlyFee) {
+        queryParams.push(maxYearlyFee);
+        filterQuery += ` AND c.yearly_fee <= $${queryParams.length}`;
+    }
+
+    if (minYearlyIncome) {
+        queryParams.push(minYearlyIncome);
+        filterQuery += ` AND c.yearly_income_minimum >= $${queryParams.length}`;
+    }
+
+    if (maxYearlyIncome) {
+        queryParams.push(maxYearlyIncome);
+        filterQuery += ` AND c.yearly_income_minimum <= $${queryParams.length}`;
+    }
+
+    const { rows } = await pool.query(
+        `SELECT c.id, c.title, c.yearly_fee, c.detail_yearly_fee,
+                ARRAY(
+                    SELECT feature FROM credit_card_features WHERE credit_card_id = c.id
+                ) AS feature_list
+         FROM credit_card c
+         WHERE c.is_deleted = FALSE ${filterQuery}
+         ORDER BY ${sortBy} ${sortDirection}
+         LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`,
+        [...queryParams, limit, offset]
+    );
+
+    const totalResult = await pool.query(
+        `SELECT COUNT(*) FROM credit_card c WHERE c.is_deleted = FALSE ${filterQuery}`,
+        queryParams
+    );
+
+    return {
+        creditCards: rows.map(formatCreditCardResponse),
+        pagination: {
+            total: parseInt(totalResult.rows[0].count, 10),
+            totalPages: Math.ceil(totalResult.rows[0].count / limit),
+            currentPage: Math.floor(offset / limit) + 1,
+            size: limit
+        }
+    };
+};
+
+// ✅ Helper function to format response in camelCase
+const formatCreditCardResponse = (creditCard) => ({
+    id: creditCard.id,
+    title: creditCard.title,
+    yearlyFee: creditCard.yearly_fee,
+    detailYearlyFee: creditCard.detail_yearly_fee,
+    featureList: creditCard.feature_list
+});

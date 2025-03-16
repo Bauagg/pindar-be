@@ -3,7 +3,7 @@ import {
     checkPublisherExists,
     deleteCreditCardById,
     getCreditCardById,
-    getCreditCardList,
+    getCreditCardList, getCreditCards,
     insertCreditCard,
     updateCreditCardById
 } from "../../repository/creditCardRepository.js";
@@ -63,28 +63,32 @@ export const modifyCreditCard = async (id, data) => {
 export const removeCreditCard = async (id) => {
     await deleteCreditCardById(id);
 };
+export const fetchCreditCards = async (filters) => {
+    return await getCreditCards(filters);
+}
 
 // ✅ Helper function to format response in camelCase
 const formatCreditCardResponse = (creditCard) => ({
     id: creditCard.id,
-    imageId: creditCard.image_id,
-    publisherId: creditCard.publisher_id,
-    featureTypeId: creditCard.feature_type_id,
-    rewardOrFee: creditCard.reward_or_fee,
-    detailRewardOrFee: creditCard.detail_reward_or_fee,
     title: creditCard.title,
-    additionalCardAnnualFee: creditCard.additional_card_annual_fee,
+    yearlyFee: creditCard.yearly_fee,
+    detailYearlyFee: creditCard.detail_yearly_fee,
     purchaseRate: creditCard.purchase_rate,
     cashbackRate: creditCard.cashback_rate,
-    detailCashbackRate: creditCard.detail_cashback_rate,
-    minimumWithdraw: creditCard.minimum_withdraw,
     monthlyIncomeMinimum: creditCard.monthly_income_minimum,
-    whoCanRegister: creditCard.who_can_register,
-    mustHaveCreditCard: creditCard.must_have_credit_card,
-    cardImageId: creditCard.card_image_id,
-    createdBy: creditCard.created_by,
-    createdDate: creditCard.created_date,
-    updatedBy: creditCard.updated_by,
-    updatedDate: creditCard.updated_date,
-    yearlyIncomeMinimum: creditCard.yearly_income_minimum
+    yearlyIncomeMinimum: creditCard.yearly_income_minimum,
+    additionalInformation: creditCard.additional_information,
+    termsDocument: creditCard.terms_document,
+    productDescription: creditCard.product_description,
+    billPaymentTutorial: creditCard.bill_payment_tutorial,
+    publisher: {
+        id: creditCard.publisher_id,
+        name: creditCard.publisher_name
+    },
+    type: {
+        id: creditCard.type_id,
+        name: creditCard.type_name
+    },
+    imageLink: creditCard.image_link,
+    features: creditCard.features
 });
