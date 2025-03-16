@@ -10,14 +10,14 @@ export const insertCreditCard = async (data) => {
             `INSERT INTO credit_card (image_id, publisher_id, feature_type_id, reward_or_fee, detail_reward_or_fee, title, 
                                 additional_card_annual_fee, purchase_rate, cashback_rate, detail_cashback_rate, 
                                 minimum_withdraw, monthly_income_minimum, who_can_register, must_have_credit_card, 
-                                created_by) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+                                created_by, yearly_income_minimum) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
        RETURNING id`,
             [
                 data.imageId, data.publisherId, data.featureTypeId, data.rewardOrFee, data.detailRewardOrFee, data.title,
                 data.additionalCardAnnualFee, data.purchaseRate, data.cashbackRate, data.detailCashbackRate,
                 data.minimumWithdraw, data.monthlyIncomeMinimum, data.whoCanRegister, data.mustHaveCreditCard,
-                data.createdBy
+                data.createdBy, data.yearlyIncomeMinimum
             ]
         );
 
@@ -51,7 +51,7 @@ export const insertCreditCard = async (data) => {
 
 export const getCreditCardById = async (id) => {
     const { rows } = await pool.query(
-        `SELECT c.id, c.title, c.reward_or_fee, c.purchase_rate, c.cashback_rate, c.monthly_income_minimum,
+        `SELECT c.id, c.title, c.reward_or_fee, c.purchase_rate, c.cashback_rate, c.monthly_income_minimum, c.yearly_income_minimum,
                 cd.additional_information, cd.terms_document, cd.product_description, cd.bill_payment_tutorial,
                 cp.id AS publisher_id, cp.publisher_name,
                 cf.id AS type_id, cf.feature_name AS type_name,
@@ -92,13 +92,13 @@ export const updateCreditCardById = async (id, data) => {
                  detail_reward_or_fee = $5, title = $6, additional_card_annual_fee = $7, 
                  purchase_rate = $8, cashback_rate = $9, detail_cashback_rate = $10, 
                  minimum_withdraw = $11, monthly_income_minimum = $12, who_can_register = $13, 
-                 must_have_credit_card = $14, updated_by = $15, updated_date = NOW()
+                 must_have_credit_card = $14, updated_by = $15, updated_date = NOW(), yearly_income_minimum = $17
              WHERE id = $16 AND is_deleted = FALSE`,
             [
                 data.imageId, data.publisherId, data.featureTypeId, data.rewardOrFee, data.detailRewardOrFee, data.title,
                 data.additionalCardAnnualFee, data.purchaseRate, data.cashbackRate, data.detailCashbackRate,
                 data.minimumWithdraw, data.monthlyIncomeMinimum, data.whoCanRegister, data.mustHaveCreditCard,
-                data.updatedBy, id
+                data.updatedBy, id, data.yearlyIncomeMinimum
             ]
         );
 

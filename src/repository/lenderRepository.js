@@ -58,7 +58,7 @@ export const fetchLenders = async (limit, offset, search, sortBy, sortDirection,
         // Query for paginated results
         const lendersResult = await client.query(
             `SELECT l.id, l.lender_name, 
-              CONCAT('/api/file/image/', f.id, '.', f.file_extension) AS imageLink, 
+              CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, 
               l.max_tenor AS maxTenor, 
               l.max_loan AS maxLoan
        FROM lender l

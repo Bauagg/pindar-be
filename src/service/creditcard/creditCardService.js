@@ -85,5 +85,6 @@ const formatCreditCardResponse = (creditCard) => ({
     createdBy: creditCard.created_by,
     createdDate: creditCard.created_date,
     updatedBy: creditCard.updated_by,
-    updatedDate: creditCard.updated_date
+    updatedDate: creditCard.updated_date,
+    yearlyIncomeMinimum: creditCard.yearly_income_minimum
 });
