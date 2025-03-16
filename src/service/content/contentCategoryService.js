@@ -1,10 +1,11 @@
 import {
     deleteContentCategoryById,
     getAllContentCategories,
-    getContentCategoryById, insertBulkContentCategories,
-    insertContentCategory, updateContentCategoryById
+    getContentCategoryById,
+    insertBulkContentCategories,
+    insertContentCategory,
+    updateContentCategoryById
 } from "../../repository/contentCategoryRepository.js";
-
 
 export const addContentCategory = async (data) => {
     const { name } = data;
@@ -13,17 +14,21 @@ export const addContentCategory = async (data) => {
         throw { status: 400, message: 'Missing required field: name.' };
     }
 
-    return await insertContentCategory({ name });
+    const category = await insertContentCategory({ name });
+
+    return formatCategoryResponse(category);
 };
 
 export const fetchContentCategories = async () => {
-    return await getAllContentCategories();
+    const categories = await getAllContentCategories();
+    return categories.map(formatCategoryResponse);
 };
 
 export const fetchContentCategoryById = async (id) => {
     const category = await getContentCategoryById(id);
     if (!category) throw { status: 404, message: 'Content category not found.' };
-    return category;
+
+    return formatCategoryResponse(category);
 };
 
 export const modifyContentCategory = async (id, data) => {
@@ -32,7 +37,9 @@ export const modifyContentCategory = async (id, data) => {
         throw { status: 400, message: 'Missing required field: name.' };
     }
 
-    return await updateContentCategoryById(id, { name });
+    const updatedCategory = await updateContentCategoryById(id, { name });
+
+    return formatCategoryResponse(updatedCategory);
 };
 
 export const removeContentCategory = async (id) => {
@@ -44,5 +51,13 @@ export const addBulkContentCategories = async (categories) => {
         throw { status: 400, message: 'Invalid input, expected an array of categories.' };
     }
 
-    return await insertBulkContentCategories(categories);
+    const insertedCategories = await insertBulkContentCategories(categories);
+
+    return insertedCategories.map(formatCategoryResponse);
 };
+
+// ✅ Helper function to format response in camelCase
+const formatCategoryResponse = (category) => ({
+    id: category.id,
+    name: category.name
+});

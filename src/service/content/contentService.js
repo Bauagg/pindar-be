@@ -6,7 +6,6 @@ import {
     updateContentById
 } from "../../repository/contentRepository.js";
 
-
 export const addContent = async (data) => {
     const { title, categoryId, contentDetail, linkPath, imageId } = data;
 
@@ -14,36 +13,57 @@ export const addContent = async (data) => {
         throw { status: 400, message: 'Missing required fields.' };
     }
 
-    return await insertContent({ title, categoryId, contentDetail, linkPath, imageId });
-};
+    const content = await insertContent({ title, categoryId, contentDetail, linkPath, imageId });
 
-export const addBulkContent = async (contents) => {
-    if (!Array.isArray(contents) || contents.length === 0) {
-        throw { status: 400, message: 'Invalid input, expected an array of contents.' };
-    }
-
-    return await insertBulkContent(contents);
+    return formatContentResponse(content);
 };
 
 export const fetchContentById = async (id) => {
     const content = await getContentById(id);
     if (!content) throw { status: 404, message: 'Content not found.' };
-    return content;
+
+    return formatContentResponse(content);
 };
 
-export const fetchContentList = async (limit, offset, sortBy, sortDirection) => {
-    return await getContentList(limit, offset, sortBy, sortDirection);
+export const fetchContentList = async (limit, offset, search, sortBy, sortDirection) => {
+    const contents = await getContentList(limit, offset, search, sortBy, sortDirection);
+
+    return {
+        contents: contents.contents.map(formatContentResponse),
+        pagination: {
+            total: contents.pagination.total,
+            totalPages: contents.pagination.totalPages,
+            currentPage: contents.pagination.currentPage,
+            size: contents.pagination.size
+        }
+    };
 };
 
 export const modifyContent = async (id, data) => {
     const { title, categoryId, contentDetail, linkPath, imageId } = data;
+
     if (!title || !categoryId || !contentDetail || !linkPath) {
         throw { status: 400, message: 'Missing required fields.' };
     }
 
-    return await updateContentById(id, { title, categoryId, contentDetail, linkPath, imageId });
+    const updatedContent = await updateContentById(id, { title, categoryId, contentDetail, linkPath, imageId });
+
+    return formatContentResponse(updatedContent);
 };
 
 export const removeContent = async (id) => {
     await deleteContentById(id);
 };
+
+// ✅ Helper function to format response in camelCase
+const formatContentResponse = (content) => ({
+    id: content.id,
+    title: content.title,
+    categoryId: content.category_id,
+    categoryName: content.category_name,
+    contentDetail: content.content_detail,
+    linkPath: content.link_path,
+    imageLink: content.image_id ? `/file/image/${content.image_id}` : null,
+    createdDate: content.created_date,
+    updatedDate: content.updated_date
+});

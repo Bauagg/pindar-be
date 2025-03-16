@@ -73,9 +73,9 @@ export const adminSignInService = async (email, encryptedPassword) => {
             message: "Admin login successful.",
             data: {
                 accessToken,
-                accessToken_expiry_time: accessTokenExpiryTime,
+                accessTokenExpiryTime: accessTokenExpiryTime,
                 refreshToken,
-                refreshToken_expiry_time: refreshTokenExpiryTime
+                refreshTokenExpiryTime: refreshTokenExpiryTime
             }
         };
     } finally {

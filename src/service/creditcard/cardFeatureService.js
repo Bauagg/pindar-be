@@ -1,7 +1,8 @@
 import {
     deleteCardFeatureById,
     getAllCardFeatures,
-    getCardFeatureById, insertBulkCardFeatures,
+    getCardFeatureById,
+    insertBulkCardFeatures,
     insertCardFeature,
     updateCardFeatureById
 } from "../../repository/cardFeatureRepository.js";
@@ -13,17 +14,21 @@ export const addCardFeature = async (data) => {
         throw { status: 400, message: 'Missing required field: featureName.' };
     }
 
-    return await insertCardFeature({ featureName });
+    const feature = await insertCardFeature({ featureName });
+
+    return formatFeatureResponse(feature);
 };
 
 export const fetchCardFeatures = async () => {
-    return await getAllCardFeatures();
+    const features = await getAllCardFeatures();
+    return features.map(formatFeatureResponse);
 };
 
 export const fetchCardFeatureById = async (id) => {
     const feature = await getCardFeatureById(id);
     if (!feature) throw { status: 404, message: 'Card feature not found.' };
-    return feature;
+
+    return formatFeatureResponse(feature);
 };
 
 export const modifyCardFeature = async (id, data) => {
@@ -32,7 +37,9 @@ export const modifyCardFeature = async (id, data) => {
         throw { status: 400, message: 'Missing required field: featureName.' };
     }
 
-    return await updateCardFeatureById(id, { featureName });
+    const updatedFeature = await updateCardFeatureById(id, { featureName });
+
+    return formatFeatureResponse(updatedFeature);
 };
 
 export const removeCardFeature = async (id) => {
@@ -44,5 +51,13 @@ export const addBulkCardFeaturesService = async (features) => {
         throw { status: 400, message: 'Invalid input, expected an array of features.' };
     }
 
-    return await insertBulkCardFeatures(features.features);
+    const insertedFeatures = await insertBulkCardFeatures(features.features);
+
+    return insertedFeatures.map(formatFeatureResponse);
 };
+
+// ✅ Helper function to format response in camelCase
+const formatFeatureResponse = (feature) => ({
+    id: feature.id,
+    featureName: feature.feature_name
+});

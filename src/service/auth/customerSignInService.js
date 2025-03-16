@@ -65,9 +65,9 @@ export const loginUserService = async (email, encryptedPassword) => {
             message: "Login successful.",
             data: {
                 accessToken,
-                accessToken_expiry_time: accessTokenExpiryTime,
+                accessTokenExpiryTime: accessTokenExpiryTime,
                 refreshToken,
-                refreshToken_expiry_time: refreshTokenExpiryTime
+                refreshTokenExpiryTime: refreshTokenExpiryTime
             }
         };
     } finally {

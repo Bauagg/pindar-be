@@ -37,7 +37,7 @@ export const refreshTokenService = async (refreshToken) => {
             message: "New access token generated successfully.",
             data: {
                 accessToken,
-                accessToken_expiry_time: accessTokenExpiryTime
+                accessTokenExpiryTime: accessTokenExpiryTime
             }
         };
     } catch (error) {

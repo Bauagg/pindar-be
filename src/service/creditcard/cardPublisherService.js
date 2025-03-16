@@ -1,9 +1,11 @@
 import {
     getAllCardPublishers,
-    getCardPublisherById, insertBulkCardPublishers,
-    insertCardPublisher, softDeleteCardPublisherById, updateCardPublisherById
+    getCardPublisherById,
+    insertBulkCardPublishers,
+    insertCardPublisher,
+    softDeleteCardPublisherById,
+    updateCardPublisherById
 } from "../../repository/cardPublisherRepository.js";
-
 
 export const addCardPublisher = async (data) => {
     const { number, publisherName } = data;
@@ -12,26 +14,33 @@ export const addCardPublisher = async (data) => {
         throw { status: 400, message: 'Missing required fields.' };
     }
 
-    return await insertCardPublisher({ number, publisherName });
+    const publisher = await insertCardPublisher({ number, publisherName });
+
+    return formatPublisherResponse(publisher);
 };
 
 export const fetchCardPublishers = async () => {
-    return await getAllCardPublishers();
+    const publishers = await getAllCardPublishers();
+    return publishers.map(formatPublisherResponse);
 };
 
 export const fetchCardPublisherById = async (id) => {
     const publisher = await getCardPublisherById(id);
     if (!publisher) throw { status: 404, message: 'Card publisher not found.' };
-    return publisher;
+
+    return formatPublisherResponse(publisher);
 };
 
 export const modifyCardPublisher = async (id, data) => {
     const { number, publisherName } = data;
+
     if (!number || !publisherName) {
         throw { status: 400, message: 'Missing required fields.' };
     }
 
-    return await updateCardPublisherById(id, { number, publisherName });
+    const updatedPublisher = await updateCardPublisherById(id, { number, publisherName });
+
+    return formatPublisherResponse(updatedPublisher);
 };
 
 export const softDeleteCardPublisher = async (id) => {
@@ -43,5 +52,14 @@ export const addBulkCardPublishers = async (publishers) => {
         throw { status: 400, message: 'Invalid input, expected an array of publishers.' };
     }
 
-    return await insertBulkCardPublishers(publishers.publishers);
+    const insertedPublishers = await insertBulkCardPublishers(publishers.publishers);
+
+    return insertedPublishers.map(formatPublisherResponse);
 };
+
+// ✅ Helper function to format response in camelCase
+const formatPublisherResponse = (publisher) => ({
+    id: publisher.id,
+    number: publisher.number,
+    publisherName: publisher.publisher_name
+});
