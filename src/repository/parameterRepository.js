@@ -25,3 +25,26 @@ export const getParametersByGroup = async (group) => {
     const { rows } = await pool.query(query, [group]);
     return rows;
 };
+
+export const updateParameterValue = async (paramKey, paramValue) => {
+    const { rows } = await pool.query(
+        `UPDATE parameters 
+         SET param_value = $1, updated_at = NOW()
+         WHERE param_key = $2
+         RETURNING id, param_key, param_value, updated_at`,
+        [paramValue, paramKey]
+    );
+
+    return rows[0];
+};
+
+export const getParameterByKey = async (paramKey) => {
+    const { rows } = await pool.query(
+        `SELECT param_key, param_value
+         FROM parameters
+         WHERE param_key = $1 AND is_fetchable = TRUE`,
+        [paramKey]
+    );
+
+    return rows[0]; // Returns undefined if not found
+};

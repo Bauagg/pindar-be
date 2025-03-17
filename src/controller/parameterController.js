@@ -1,4 +1,5 @@
-import {fetchParametersByGroup} from "../service/parameter/getParameterByGroupService.js";
+import {fetchParametersByGroup, modifyParameterValue} from "../service/parameter/parameterService.js";
+import {fetchParameterByKey} from "../service/announcement/announcementService.js";
 
 export const getParametersByGroup = async (req, res, next) => {
     try {
@@ -15,5 +16,37 @@ export const getParametersByGroup = async (req, res, next) => {
         });
     } catch (err) {
         next(err);
+    }
+};
+
+export const updateParameter = async (req, res, next) => {
+    try {
+        const { paramValue } = req.body;
+        const paramKey = req.params.paramKey;
+
+        const updatedParam = await modifyParameterValue(paramKey, paramValue);
+
+        res.status(200).json({
+            code: 200,
+            message: "Parameter updated successfully.",
+            data: updatedParam
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getParameter = async (req, res, next) => {
+    try {
+        const paramKey = req.params.paramKey;
+        const parameter = await fetchParameterByKey(paramKey);
+
+        res.status(200).json({
+            code: 200,
+            message: "Parameter retrieved successfully.",
+            data: parameter
+        });
+    } catch (error) {
+        next(error);
     }
 };
