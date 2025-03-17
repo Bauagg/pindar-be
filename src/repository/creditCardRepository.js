@@ -144,34 +144,58 @@ export const deleteCreditCardById = async (id) => {
     );
 };
 
-export const getCreditCardList = async (limit, offset, search) => {
-    const searchQuery = `%${search}%`;
+export const searchCreditCards = async ({ publisherId, featureIds, minYearlyFee, maxYearlyFee, minYearlyIncome, maxYearlyIncome, sortBy, sortDirection, limit, offset }) => {
+    let query = `
+        SELECT c.id, c.title, c.yearly_fee, c.detail_yearly_fee, 
+               CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
+        FROM credit_card c
+        LEFT JOIN files f ON c.image_id = f.id
+        WHERE c.is_deleted = FALSE
+    `;
 
-    const { rows } = await pool.query(
-        `SELECT c.id, c.title, c.yearly_fee AS yearly_fee, c.cashback_rate AS cashback,
-            ROW_NUMBER() OVER (ORDER BY c.created_date DESC) AS row_number,
-            CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id) ELSE NULL END AS image_link
-     FROM credit_card c
-     LEFT JOIN files f ON c.image_id = f.id
-     WHERE c.is_deleted = FALSE AND c.title ILIKE $1
-     LIMIT $2 OFFSET $3`,
-        [searchQuery, limit, offset]
-    );
+    const queryParams = [];
 
-    const totalResult = await pool.query(
-        `SELECT COUNT(*) FROM credit_card WHERE is_deleted = FALSE AND title ILIKE $1`,
-        [searchQuery]
-    );
+    if (publisherId) {
+        queryParams.push(publisherId);
+        query += ` AND c.publisher_id = $${queryParams.length}`;
+    }
 
-    return {
-        creditCards: rows,
-        pagination: {
-            total: parseInt(totalResult.rows[0].count, 10),
-            totalPages: Math.ceil(totalResult.rows[0].count / limit),
-            currentPage: Math.floor(offset / limit) + 1,
-            size: limit
-        }
-    };
+    if (featureIds && featureIds.length > 0) {
+        const placeholders = featureIds.map((_, index) => `$${queryParams.length + index + 1}`).join(",");
+        queryParams.push(...featureIds);
+        query += ` AND c.id IN (
+            SELECT DISTINCT ccf.credit_card_id 
+            FROM credit_card_features ccf
+            WHERE ccf.feature IN (${placeholders})
+        )`;
+    }
+
+    if (minYearlyFee !== undefined) {
+        queryParams.push(minYearlyFee);
+        query += ` AND c.yearly_fee >= $${queryParams.length}`;
+    }
+
+    if (maxYearlyFee !== undefined) {
+        queryParams.push(maxYearlyFee);
+        query += ` AND c.yearly_fee <= $${queryParams.length}`;
+    }
+
+    if (minYearlyIncome !== undefined) {
+        queryParams.push(minYearlyIncome);
+        query += ` AND c.yearly_income_minimum >= $${queryParams.length}`;
+    }
+
+    if (maxYearlyIncome !== undefined) {
+        queryParams.push(maxYearlyIncome);
+        query += ` AND c.yearly_income_minimum <= $${queryParams.length}`;
+    }
+
+    query += ` ORDER BY ${sortBy} ${sortDirection} LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+
+    queryParams.push(limit, offset);
+
+    const { rows } = await pool.query(query, queryParams);
+    return rows;
 };
 
 export const checkPublisherExists = async (publisherId) => {

@@ -2,9 +2,8 @@ import {
     checkFeatureExists,
     checkPublisherExists,
     deleteCreditCardById,
-    getCreditCardById,
-    getCreditCardList, getCreditCards,
-    insertCreditCard,
+    getCreditCardById, getCreditCards,
+    insertCreditCard, searchCreditCards,
     updateCreditCardById
 } from "../../repository/creditCardRepository.js";
 
@@ -31,17 +30,42 @@ export const fetchCreditCardById = async (id) => {
     return formatCreditCardResponse(creditCard);
 };
 
-export const fetchCreditCardList = async (limit, offset, search) => {
-    const creditCards = await getCreditCardList(limit, offset, search);
-    return {
-        creditCards: creditCards.creditCards.map(formatCreditCardResponse),
-        pagination: {
-            total: creditCards.pagination.total,
-            totalPages: creditCards.pagination.totalPages,
-            currentPage: creditCards.pagination.currentPage,
-            size: creditCards.pagination.size
-        }
-    };
+export const fetchCreditCardsList = async (filters) => {
+    const {
+        publisherId,
+        featureIds = [],
+        minYearlyFee,
+        maxYearlyFee,
+        minYearlyIncome,
+        maxYearlyIncome,
+        sortBy = "yearly_fee",
+        sortDirection = "asc",
+        limit = 10,
+        offset = 0
+    } = filters;
+
+    if (!["yearly_fee", "yearly_income_minimum"].includes(sortBy)) {
+        throw { status: 400, message: "Invalid sort field." };
+    }
+
+    if (!["asc", "desc"].includes(sortDirection.toLowerCase())) {
+        throw { status: 400, message: "Invalid sort direction." };
+    }
+
+    const creditCards = await searchCreditCards({
+        publisherId,
+        featureIds,
+        minYearlyFee,
+        maxYearlyFee,
+        minYearlyIncome,
+        maxYearlyIncome,
+        sortBy,
+        sortDirection,
+        limit: parseInt(limit, 10),
+        offset: parseInt(offset, 10)
+    });
+
+    return creditCards.map(formatCreditCardResponse);
 };
 
 export const modifyCreditCard = async (id, data) => {

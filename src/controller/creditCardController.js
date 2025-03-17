@@ -13,8 +13,7 @@ import {
 } from "../service/creditcard/cardFeatureService.js";
 import {
     addCreditCard,
-    fetchCreditCardById,
-    fetchCreditCardList, fetchCreditCards,
+    fetchCreditCardById, fetchCreditCardsList,
     modifyCreditCard, removeCreditCard
 } from "../service/creditcard/creditCardService.js";
 
@@ -188,24 +187,26 @@ export const deleteCreditCard = async (req, res, next) => {
 
 export const searchCreditCards = async (req, res, next) => {
     try {
-        const {
-            publisherId, featureId, minYearlyFee, maxYearlyFee,
-            minYearlyIncome, maxYearlyIncome, sortBy = 'title',
-            sortDirection = 'asc', limit = 10, offset = 0
-        } = req.query;
+        const filters = {
+            publisherId: req.query.publisherId,
+            featureIds: req.query.featureIds ? req.query.featureIds.split(",") : [],
+            minYearlyFee: req.query.minYearlyFee ? parseInt(req.query.minYearlyFee, 10) : undefined,
+            maxYearlyFee: req.query.maxYearlyFee ? parseInt(req.query.maxYearlyFee, 10) : undefined,
+            minYearlyIncome: req.query.minYearlyIncome ? parseInt(req.query.minYearlyIncome, 10) : undefined,
+            maxYearlyIncome: req.query.maxYearlyIncome ? parseInt(req.query.maxYearlyIncome, 10) : undefined,
+            sortBy: req.query.sortBy,
+            sortDirection: req.query.sortDirection,
+            limit: req.query.limit ? parseInt(req.query.limit, 10) : 10,
+            offset: req.query.offset ? parseInt(req.query.offset, 10) : 0
+        };
 
-        const creditCards = await fetchCreditCards({
-            publisherId, featureId, minYearlyFee, maxYearlyFee,
-            minYearlyIncome, maxYearlyIncome, sortBy, sortDirection,
-            limit: parseInt(limit, 10), offset: parseInt(offset, 10)
-        });
-
+        const creditCards = await fetchCreditCardsList(filters);
         res.status(200).json({
             code: 200,
-            message: 'Credit card list retrieved successfully.',
+            message: "Credit cards retrieved successfully.",
             data: creditCards
         });
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        next(error);
     }
 };

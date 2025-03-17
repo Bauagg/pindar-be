@@ -23,20 +23,7 @@ const allowedOrigins = [
     "https://pindar.id"
 ];
 
-app.use(
-    cors({
-        origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error("CORS policy: Origin not allowed"));
-            }
-        },
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: "*",
-        credentials: true
-    })
-);
+app.use(cors());
 
 app.use(express.json());
 app.use(authenticateAndAuthorize);

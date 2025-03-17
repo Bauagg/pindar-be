@@ -46,7 +46,7 @@ export const signUpUser = async ({ fullName, email, phoneNumber, password }) => 
         await insertOtp(email, hashedOtp, expiresAt, client);
         await client.query("COMMIT");
 
-        sendOTP(email, otpCode, client).catch((err) => {
+        sendOTP(email, otpCode, client, fullName).catch((err) => {
             console.error("Failed to send OTP:", err.message);
         });
 
@@ -63,7 +63,7 @@ export const signUpUser = async ({ fullName, email, phoneNumber, password }) => 
     }
 };
 
-const sendOTP = async (email, otpCode, client) => {
+const sendOTP = async (email, otpCode, client, fullName) => {
     try {
         // Fetch OTP email template and subject from parameters table
         const otpTemplate = await getParameter("OTP_EMAIL_TEMPLATE", client);
@@ -74,7 +74,8 @@ const sendOTP = async (email, otpCode, client) => {
         }
 
         // Replace placeholder {{OTP}} with actual OTP code
-        const emailText = otpTemplate.replace("{{OTP}}", otpCode);
+        const emailTextTemp = otpTemplate.replace("{{OTP}}", otpCode);
+        const emailText = emailTextTemp.replace("{{custName}}", fullName);
 
         // Create transporter
         const transporter = nodemailer.createTransport(smtpConfig);
