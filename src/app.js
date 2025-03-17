@@ -10,10 +10,36 @@ import creditCardRoute from "./route/creditCardRoute.js";
 import contentRoute from "./route/contentRoute.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authenticateAndAuthorize } from "./middleware/authMiddleware.js";
+import cors from "cors";
 
 const app = express();
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://admin.pindar.id",
+    "https://admin.pindar.id",
+    "http://pindar.id",
+    "https://pindar.id"
+];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("CORS policy: Origin not allowed"));
+            }
+        },
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: "*",
+        credentials: true
+    })
+);
+
 app.use(express.json());
 app.use(authenticateAndAuthorize);
+
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/admin", adminRoute);
@@ -23,6 +49,7 @@ app.use("/api/parameter", parameterRoute);
 app.use("/api/faq", faqRoute);
 app.use("/api/credit-card", creditCardRoute);
 app.use("/api/content", contentRoute);
+
 app.use(errorHandler);
 
 export default app;
