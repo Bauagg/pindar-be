@@ -5,15 +5,27 @@ import {
     insertContent,
     updateContentById
 } from "../../repository/contentRepository.js";
+import {getParameterByKey} from "../../repository/parameterRepository.js";
+import {createNotification} from "../../repository/notificationRepository.js";
 
 export const addContent = async (data) => {
     const { title, categoryId, contentDetail, linkPath, imageId } = data;
 
     if (!title || !categoryId || !contentDetail || !linkPath) {
-        throw { status: 400, message: 'Missing required fields.' };
+        throw { status: 400, message: "Missing required fields." };
     }
 
+    const notificationParam = await getParameterByKey("CONTENT_NOTIFICATION_TITLE");
+    const notificationTitle = notificationParam ? notificationParam.param_value : "New Content Published";
+
     const content = await insertContent({ title, categoryId, contentDetail, linkPath, imageId });
+
+    await createNotification({
+        userId: null,
+        title: notificationTitle,
+        detail: `Check out our latest content: ${title}`,
+        link: `/content/${content.id}`
+    });
 
     return formatContentResponse(content);
 };

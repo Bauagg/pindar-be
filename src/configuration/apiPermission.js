@@ -1,7 +1,7 @@
 export const apiPermissions = {
     "/api/user/update": ["CUSTOMER"],
     "/api/user/change-password": ["CUSTOMER"],
-    "/api/user/profile": ["CUSTOMER"],
+    "/api/user/profile": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/auth/logout": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/file/image": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/lender/add": ["ADMIN", "CUSTOMER", "CREATE"],
@@ -11,6 +11,9 @@ export const apiPermissions = {
     "/api/content/comment/like/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/credit-card": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/credit-card/update/:id": ["ADMIN", "CUSTOMER", "CREATE"],
+    "/api/notification/list": ["ADMIN", "CUSTOMER", "CREATE"],
+    "/api/notification/read/:userId": ["ADMIN", "CUSTOMER", "CREATE"],
+    "/api/notification/delete/:userId": ["ADMIN", "CUSTOMER", "CREATE"],
     // "/api/content/comment/replies/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
     // "/api/content/comment/list/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
 };

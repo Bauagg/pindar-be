@@ -9,6 +9,7 @@ import faqRoute from "./route/faqRoute.js";
 import creditCardRoute from "./route/creditCardRoute.js";
 import contentRoute from "./route/contentRoute.js";
 import announcementRoute from "./route/announcementRoute.js";
+import notificationRoute from "./route/notificationRoute.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authenticateAndAuthorize } from "./middleware/authMiddleware.js";
 import cors from "cors";
@@ -38,6 +39,7 @@ app.use("/api/faq", faqRoute);
 app.use("/api/credit-card", creditCardRoute);
 app.use("/api/content", contentRoute);
 app.use("/api/announcement", announcementRoute);
+app.use("/api/notification", notificationRoute);
 
 app.use(errorHandler);
 
