@@ -7,7 +7,7 @@ import {
     updateCustomerStatus,
     updateCustomer,
     changePassword,
-    getCustomerDetail
+    getCustomerDetail, forgotPasswordHandler
 } from "../controller/userController.js"; // Ensure .js extension is included
 
 const router = express.Router();
@@ -20,5 +20,6 @@ router.put("/update-status", updateCustomerStatus);
 router.put("/update", updateCustomer);
 router.put("/change-password", changePassword);
 router.get("/profile", getCustomerDetail);
+router.post("/forgot-password", forgotPasswordHandler)
 
 export default router; // ✅ Use ES module export instead of module.exports

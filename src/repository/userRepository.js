@@ -26,7 +26,7 @@ export const userRepository = async (fullName, email, phoneNumber, hashedPasswor
 
 export const getUserByEmail = async (email, client) => {
     const query = `
-        SELECT id, status, is_deleted FROM users WHERE email = $1;
+        SELECT id, full_name, status, is_deleted FROM users WHERE email = $1;
     `;
     const { rows } = await client.query(query, [email]);
     return rows.length > 0 ? rows[0] : null;
@@ -252,4 +252,11 @@ export const getCustomerDetailById = async (id, client) => {
 
     const { rows } = await client.query(query, [id]);
     return rows.length > 0 ? rows[0] : null;
+};
+
+export const updateUserPassword = async (email, hashedPassword, client = pool) => {
+    await client.query(
+        `UPDATE users SET password = $1, updated_date = NOW() WHERE email = $2 AND is_deleted = FALSE`,
+        [hashedPassword, email]
+    );
 };

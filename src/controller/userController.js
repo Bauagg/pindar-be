@@ -9,6 +9,7 @@ import {updateCustomerService} from "../service/user/updateCustomerService.js";
 import {changePasswordService} from "../service/user/changePasswordService.js";
 import {getCustomerDetailService} from "../service/user/getCustomerDetailService.js";
 import {deleteRefreshTokenService} from "../service/user/logoutService.js";
+import {forgotPassword} from "../service/user/forgotPasswordService.js";
 
 
 
@@ -173,6 +174,17 @@ export const logout = async (req, res, next) => {
         await deleteRefreshTokenService(id);
 
         res.status(200).json({ code: 200, message: "Logged out successfully." });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const forgotPasswordHandler = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const response = await forgotPassword({ email });
+
+        res.status(200).json(response);
     } catch (error) {
         next(error);
     }
