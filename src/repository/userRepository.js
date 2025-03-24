@@ -137,9 +137,22 @@ export const getUserById = async (id, client) => {
 };
 
 export const getCustomers = async (limit, offset, search, sortBy, sortOrder, client) => {
+    const validSortColumns = ['full_name', 'user_name', 'phone_number', 'email', 'status'];
+    const validSortOrders = ['ASC', 'DESC'];
+
+    const safeSortBy = validSortColumns.includes(sortBy) ? sortBy : 'full_name';
+    const safeSortOrder = validSortOrders.includes(sortOrder.toUpperCase()) ? sortOrder.toUpperCase() : 'ASC';
+
     const query = `
-        SELECT u.id, u.full_name AS "fullName", u.email, u.status, u.is_deleted AS "isDeleted", 
-               ARRAY_AGG(r.name) AS roles
+        SELECT 
+            u.id, 
+            u.full_name AS "fullName", 
+            u.user_name AS "userName", 
+            u.phone_number AS "phoneNumber", 
+            u.email, 
+            u.status, 
+            u.is_deleted AS "isDeleted",
+            ARRAY_AGG(r.name) AS roles
         FROM users u
         LEFT JOIN user_role ur ON u.id = ur.user_id
         LEFT JOIN role r ON ur.role_id = r.id
@@ -147,7 +160,7 @@ export const getCustomers = async (limit, offset, search, sortBy, sortOrder, cli
           AND r.name = 'CUSTOMER'
           AND (u.full_name ILIKE $1 OR u.email ILIKE $1)
         GROUP BY u.id
-        ORDER BY ${sortBy} ${sortOrder}
+        ORDER BY ${safeSortBy} ${safeSortOrder}
         LIMIT $2 OFFSET $3;
     `;
 
