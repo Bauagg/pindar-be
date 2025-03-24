@@ -152,6 +152,7 @@ export const getCustomers = async (limit, offset, search, sortBy, sortOrder, cli
             u.email, 
             u.status, 
             u.is_deleted AS "isDeleted",
+            u.address,
             ARRAY_AGG(r.name) AS roles
         FROM users u
         LEFT JOIN user_role ur ON u.id = ur.user_id
