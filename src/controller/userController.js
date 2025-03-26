@@ -118,7 +118,7 @@ export const updateCustomerStatus = async (req, res, next) => {
 export const updateCustomer = async (req, res, next) => {
     try {
         const { id } = req.user; // Extracted from Bearer Token
-        const { email, fullName, userName, phoneNumber, address } = req.body;
+        const { email, fullName, userName, phoneNumber, address, imageId } = req.body;
 
         if (!id) {
             const error = new Error("Unauthorized access. User ID is required.");
@@ -126,7 +126,7 @@ export const updateCustomer = async (req, res, next) => {
             throw error;
         }
 
-        const response = await updateCustomerService(id, email, fullName, userName, phoneNumber, address);
+        const response = await updateCustomerService(id, email, fullName, userName, phoneNumber, address, imageId);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);

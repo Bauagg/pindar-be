@@ -25,15 +25,15 @@ export const adminSignIn = async (req, res, next) => {
 
 export const addUser = async (req, res, next) => {
     try {
-        const { full_name, email, password, roles } = req.body;
+        const {fullName, email, password, roles } = req.body;
 
-        if (!full_name || !email || !password || !Array.isArray(roles) || roles.length === 0) {
+        if (!fullName || !email || !password || !Array.isArray(roles) || roles.length === 0) {
             const error = new Error("Invalid input. Full name, email, password, and at least one role are required.");
             error.status = 400;
             throw error;
         }
 
-        const response = await addUserService(full_name, email, password, roles);
+        const response = await addUserService(fullName, email, password, roles);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);
@@ -42,15 +42,15 @@ export const addUser = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
     try {
-        const { full_name, email, roles, status } = req.body;
+        const { fullName, email, roles, status } = req.body;
 
-        if (!full_name || !email || !Array.isArray(roles) || roles.length === 0 || !status) {
+        if (!fullName || !email || !Array.isArray(roles) || roles.length === 0 || !status) {
             const error = new Error("Invalid input. Full name, email, status, and at least one role are required.");
             error.status = 400;
             throw error;
         }
 
-        const response = await updateUserService(full_name, email, roles, status);
+        const response = await updateUserService(fullName, email, roles, status);
         res.status(response.code).json(response);
     } catch (error) {
         next(error);

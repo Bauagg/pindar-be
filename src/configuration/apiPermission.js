@@ -1,5 +1,5 @@
 export const apiPermissions = {
-    "/api/user/update": ["CUSTOMER"],
+    "/api/user/update": ["CUSTOMER", "ADMIN"],
     "/api/user/change-password": ["CUSTOMER"],
     "/api/user/profile": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/auth/logout": ["ADMIN", "CUSTOMER", "CREATE"],

@@ -5,13 +5,14 @@ import {
     getCustomerById,
     updateCustomerInDB
 } from "../../repository/userRepository.js";
+import {markFileAsUsed} from "../../controller/fileController.js";
 
 
-export const updateCustomerService = async (id, email, fullName, userName, phoneNumber, address) => {
+export const updateCustomerService = async (id, email, fullName, userName, phoneNumber, address, imageId) => {
     const client = await pool.connect();
 
     try {
-        await client.query("BEGIN");
+        await pool.query("BEGIN");
 
         // Fetch existing customer
         const customer = await getCustomerById(id, client);
@@ -47,14 +48,19 @@ export const updateCustomerService = async (id, email, fullName, userName, phone
             }
         }
 
-        // Update customer details
-        await updateCustomerInDB(id, email, fullName, userName, phoneNumber, address, client);
+        // Update customer details including image
+        await updateCustomerInDB(id, email, fullName, userName, phoneNumber, address, imageId, client);
+
+        // If a new image is uploaded, mark it as used
+        if (imageId) {
+            await markFileAsUsed(imageId, client);
+        }
+
         await client.query("COMMIT");
 
         return {
             code: 200,
-            message: "Customer details updated successfully.",
-            data: { id, email, fullName, userName, phoneNumber, address }
+            message: "Customer details updated successfully."
         };
     } catch (error) {
         await client.query("ROLLBACK");
@@ -63,3 +69,5 @@ export const updateCustomerService = async (id, email, fullName, userName, phone
         client.release();
     }
 };
+
+

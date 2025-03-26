@@ -82,3 +82,12 @@ export const getImageById = async (req, res, next) => {
         next(error);
     }
 };
+
+export const markFileAsUsed = async (fileId, client) => {
+    const query = `
+        UPDATE files
+        SET is_used = true
+        WHERE id = $1;
+    `;
+    await client.query(query, [fileId]);
+};

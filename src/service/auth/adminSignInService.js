@@ -72,6 +72,8 @@ export const adminSignInService = async (email, encryptedPassword) => {
             code: 200,
             message: "Admin login successful.",
             data: {
+                fullName: user.full_name,
+                imageLink: user.imagelink,
                 accessToken,
                 accessTokenExpiryTime: accessTokenExpiryTime,
                 refreshToken,

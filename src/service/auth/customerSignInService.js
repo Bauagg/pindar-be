@@ -64,6 +64,8 @@ export const loginUserService = async (email, encryptedPassword) => {
             code: 200,
             message: "Login successful.",
             data: {
+                fullName: user.full_name,
+                imageLink: user.imagelink,
                 accessToken,
                 accessTokenExpiryTime: accessTokenExpiryTime,
                 refreshToken,

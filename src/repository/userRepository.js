@@ -34,17 +34,23 @@ export const getUserByEmail = async (email, client) => {
 
 export const getUserAndRoleByEmail = async (email, client) => {
     const query = `
-        SELECT u.id, u.email, u.password, u.status, 
-               ARRAY_AGG(r.name) AS roles
+        SELECT u.id, u.full_name, u.email, u.password, u.status, 
+               ARRAY_AGG(r.name) AS roles,
+               CASE 
+                   WHEN f.id IS NOT NULL THEN CONCAT('/api/file/image/', f.id, f.file_extension) 
+                   ELSE NULL 
+               END AS imagelink
         FROM users u
         LEFT JOIN user_role ur ON u.id = ur.user_id
         LEFT JOIN role r ON ur.role_id = r.id
+        LEFT JOIN files f ON u.profile_image = f.id
         WHERE u.email = $1
-        GROUP BY u.id;
+        GROUP BY u.id, f.id, f.file_extension;
     `;
     const { rows } = await client.query(query, [email]);
     return rows.length > 0 ? rows[0] : null;
 };
+
 
 export const updateLastLogin = async (userId, client) => {
     const query = `UPDATE users SET last_login = NOW() WHERE id = $1;`;
@@ -190,7 +196,7 @@ export const getCustomerById = async (id, client) => {
         FROM users u
         LEFT JOIN user_role ur ON u.id = ur.user_id
         LEFT JOIN role r ON ur.role_id = r.id
-        WHERE u.id = $1 AND r.name = 'CUSTOMER';
+        WHERE u.id = $1;
     `;
 
     const { rows } = await client.query(query, [id]);
@@ -218,19 +224,22 @@ export const checkPhoneNumberExists = async (phoneNumber, id, client) => {
     return rows.length > 0;
 };
 
-export const updateCustomerInDB = async (id, email, fullName, userName, phoneNumber, address, client) => {
+export const updateCustomerInDB = async (id, email, fullName, userName, phoneNumber, address, imageId, client) => {
     const query = `
-        UPDATE users 
+        UPDATE users
         SET email = COALESCE($1, email),
             full_name = COALESCE($2, full_name),
             user_name = COALESCE($3, user_name),
             phone_number = COALESCE($4, phone_number),
             address = COALESCE($5, address),
+            profile_image = COALESCE($6, profile_image),
             updated_date = NOW()
-        WHERE id = $6;
+        WHERE id = $7;
     `;
-    await client.query(query, [email, fullName, userName, phoneNumber, address, id]);
+    await client.query(query, [email, fullName, userName, phoneNumber, address, imageId, id]);
 };
+
+
 
 export const getCustomerPasswordById = async (id, client) => {
     const query = `
@@ -257,16 +266,22 @@ export const updateCustomerPassword = async (id, hashedPassword, client) => {
 export const getCustomerDetailById = async (id, client) => {
     const query = `
         SELECT u.id, u.email, u.full_name AS "fullName", u.user_name AS "userName",
-               u.phone_number AS "phoneNumber", u.address, u.status, u.is_deleted AS "isDeleted"
+               u.phone_number AS "phoneNumber", u.address, u.status, u.is_deleted AS "isDeleted",
+               CASE 
+                   WHEN f.id IS NOT NULL THEN CONCAT('/api/file/image/', f.id, f.file_extension) 
+                   ELSE NULL 
+               END AS "imagelink"
         FROM users u
         LEFT JOIN user_role ur ON u.id = ur.user_id
         LEFT JOIN role r ON ur.role_id = r.id
-        WHERE u.id = $1 AND r.name = 'CUSTOMER';
+        LEFT JOIN files f ON u.profile_image = f.id
+        WHERE u.id = $1;
     `;
 
     const { rows } = await client.query(query, [id]);
     return rows.length > 0 ? rows[0] : null;
 };
+
 
 export const updateUserPassword = async (email, hashedPassword, client = pool) => {
     await client.query(
