@@ -102,6 +102,13 @@ const formatCreditCardResponse = (creditCard) => ({
     cashbackRate: creditCard.cashback_rate,
     monthlyIncomeMinimum: creditCard.monthly_income_minimum,
     yearlyIncomeMinimum: creditCard.yearly_income_minimum,
+    monthlyMinimumPayment: creditCard.monthly_minimum_payment,
+    latePaymentChargePenalty: creditCard.late_payment_charge_penalty,
+    latePaymentAdminCharge: creditCard.late_payment_admin_charge,
+    maximumWithdrawDaily: creditCard.maximum_withdraw_daily,
+    mainCardMinimumAge: creditCard.main_card_minimum_age,
+    mainCardMaximumAge: creditCard.main_card_maximum_age,
+    additionalCardMinimumAge: creditCard.additional_card_minimum_age,
     additionalInformation: creditCard.additional_information,
     termsDocument: creditCard.terms_document,
     productDescription: creditCard.product_description,
@@ -117,3 +124,4 @@ const formatCreditCardResponse = (creditCard) => ({
     imageLink: creditCard.image_link,
     features: creditCard.features
 });
+

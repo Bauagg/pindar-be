@@ -10,14 +10,24 @@ export const insertCreditCard = async (data) => {
             `INSERT INTO credit_card (image_id, publisher_id, feature_type_id, yearly_fee, detail_yearly_fee, title, 
                                 additional_card_annual_fee, purchase_rate, cashback_rate, detail_cashback_rate, 
                                 minimum_withdraw, monthly_income_minimum, who_can_register, must_have_credit_card, 
-                                created_by, yearly_income_minimum) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                                created_by, yearly_income_minimum, monthly_minimum_payment, late_payment_charge_penalty,
+                                      late_payment_admin_charge, maximum_withdraw_daily, main_card_minimum_age,
+                                      main_card_maximum_age, additional_card_minimum_age
+                         ) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
        RETURNING id`,
             [
                 data.imageId, data.publisherId, data.featureTypeId, data.rewardOrFee, data.detailRewardOrFee, data.title,
                 data.additionalCardAnnualFee, data.purchaseRate, data.cashbackRate, data.detailCashbackRate,
                 data.minimumWithdraw, data.monthlyIncomeMinimum, data.whoCanRegister, data.mustHaveCreditCard,
-                data.createdBy, data.yearlyIncomeMinimum
+                data.createdBy, data.yearlyIncomeMinimum,
+                data.monthlyMinimumPayment,
+                data.latePaymentChargePenalty,
+                data.latePaymentAdminCharge,
+                data.maximumWithdrawDaily,
+                data.mainCardMinimumAge,
+                data.mainCardMaximumAge,
+                data.additionalCardMinimumAge
             ]
         );
 
@@ -51,10 +61,29 @@ export const insertCreditCard = async (data) => {
 
 export const getCreditCardById = async (id) => {
     const { rows } = await pool.query(
-        `SELECT c.id, c.title, c.yearly_fee, c.additional_card_annual_fee, c.purchase_rate, c.cashback_rate, c.monthly_income_minimum, c.yearly_income_minimum,
-                cd.additional_information, cd.terms_document, cd.product_description, cd.bill_payment_tutorial,
-                cp.id AS publisher_id, cp.publisher_name,
-                cf.id AS type_id, cf.feature_name AS type_name,
+        `SELECT c.id,
+                c.title,
+                c.yearly_fee,
+                c.additional_card_annual_fee,
+                c.purchase_rate,
+                c.cashback_rate,
+                c.monthly_income_minimum,
+                c.yearly_income_minimum,
+                c.monthly_minimum_payment,
+                c.late_payment_charge_penalty,
+                c.late_payment_admin_charge,
+                c.maximum_withdraw_daily,
+                c.main_card_minimum_age,
+                c.main_card_maximum_age,
+                c.additional_card_minimum_age,
+                cd.additional_information,
+                cd.terms_document,
+                cd.product_description,
+                cd.bill_payment_tutorial,
+                cp.id AS publisher_id,
+                cp.publisher_name,
+                cf.id AS type_id,
+                cf.feature_name AS type_name,
                 CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id) ELSE NULL END AS image_link
          FROM credit_card c
                   JOIN credit_card_detail cd ON c.id = cd.card_id
@@ -64,6 +93,7 @@ export const getCreditCardById = async (id) => {
          WHERE c.id = $1 AND c.is_deleted = FALSE`,
         [id]
     );
+
 
     if (!rows.length) return null;
 
