@@ -33,8 +33,9 @@ export const addContent = async (data) => {
 export const fetchContentById = async (id) => {
     const content = await getContentById(id);
     if (!content) throw { status: 404, message: 'Content not found.' };
-
-    return formatContentResponse(content);
+    const response = formatContentResponse(content);
+    response.imageLink = content.image_link;
+    return response
 };
 
 export const fetchContentList = async (limit, offset, search, sortBy, sortDirection) => {
