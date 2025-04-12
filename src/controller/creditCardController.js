@@ -156,7 +156,7 @@ export const getCreditCardById = async (req, res, next) => {
 export const getCreditCardList = async (req, res, next) => {
     try {
         const { limit = 10, offset = 0, search = '' } = req.query;
-        const creditCards = await fetchCreditCardList(parseInt(limit, 10), parseInt(offset, 10), search);
+        const creditCards = await fetchCreditCardsList(parseInt(limit, 10), parseInt(offset, 10), search);
         res.status(200).json({ code: 200, message: 'Credit card list retrieved successfully.', data: creditCards });
     } catch (err) {
         next(err);

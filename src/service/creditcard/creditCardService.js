@@ -96,6 +96,7 @@ const formatCreditCardResponse = (creditCard) => ({
     id: creditCard.id,
     title: creditCard.title,
     yearlyFee: creditCard.yearly_fee,
+    additionalCardAnnualFee: creditCard.additional_card_annual_fee,
     detailYearlyFee: creditCard.detail_yearly_fee,
     purchaseRate: creditCard.purchase_rate,
     cashbackRate: creditCard.cashback_rate,

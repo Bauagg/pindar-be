@@ -51,7 +51,7 @@ export const insertCreditCard = async (data) => {
 
 export const getCreditCardById = async (id) => {
     const { rows } = await pool.query(
-        `SELECT c.id, c.title, c.yearly_fee, c.purchase_rate, c.cashback_rate, c.monthly_income_minimum, c.yearly_income_minimum,
+        `SELECT c.id, c.title, c.yearly_fee, c.additional_card_annual_fee, c.purchase_rate, c.cashback_rate, c.monthly_income_minimum, c.yearly_income_minimum,
                 cd.additional_information, cd.terms_document, cd.product_description, cd.bill_payment_tutorial,
                 cp.id AS publisher_id, cp.publisher_name,
                 cf.id AS type_id, cf.feature_name AS type_name,
