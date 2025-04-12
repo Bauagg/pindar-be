@@ -9,7 +9,7 @@ import {
 
 export const addLenderService = async (data, userEmail) => {
     const { lenderName, directLink, maxLoan, loanType, paymentType, maxTenor,
-        additionalInformation, termsDocument, imageId, anotherLend, anotherLenderType } = data;
+        additionalInformation, termsDocument, imageId, anotherLend, anotherLenderType, basicInfo, plusValue, applymentTutorial } = data;
 
     if (!lenderName || !directLink || !maxLoan || !loanType || !paymentType || !maxTenor || !imageId) {
         throw { status: 400, message: 'Missing required fields.' };
@@ -23,7 +23,7 @@ export const addLenderService = async (data, userEmail) => {
         await validateParamExist(client, paymentType, 'LENDER_PAYMENT_TYPE');
 
         const lenderId = await insertLender(client, { lenderName, directLink, maxLoan, loanType, paymentType, maxTenor, imageId, userEmail });
-        await insertLenderDetail(client, { lenderId, additionalInformation, termsDocument });
+        await insertLenderDetail(client, { lenderId, additionalInformation, termsDocument, basicInfo, plusValue, applymentTutorial });
 
         await insertOtherLender(client, lenderId, anotherLend, 'ANOTHER');
         await insertOtherLender(client, lenderId, anotherLenderType, 'ANOTHER_TYPE');

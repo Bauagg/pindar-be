@@ -117,11 +117,11 @@ export const insertLender = async (client, { lenderName, directLink, maxLoan, lo
     return rows[0].id;
 };
 
-export const insertLenderDetail = async (client, { lenderId, additionalInformation, termsDocument }) => {
+export const insertLenderDetail = async (client, { lenderId, additionalInformation, termsDocument, basicInfo, plusValue, applymentTutorial }) => {
     await client.query(
-        `INSERT INTO lender_detail (lender_id, additional_information, terms_document)
-     VALUES ($1,$2,$3)`,
-        [lenderId, additionalInformation, termsDocument]
+        `INSERT INTO lender_detail (lender_id, additional_information, terms_document, basic_info, plus_value, applyment_tutorial)
+     VALUES ($1,$2,$3,$4,$5,$6)`,
+        [lenderId, additionalInformation, termsDocument, basicInfo, plusValue, applymentTutorial]
     );
 };
 
@@ -184,6 +184,9 @@ export const findLenderById = async (id) => {
             p.param_key as payment_type_id,
             ld.additional_information,
             ld.terms_document,
+            ld. basic_info,
+            ld.plus_value,
+            ld.applyment_tutorial,
             CONCAT('/file/image/', f.id, f.file_extension) AS image_link
         FROM lender l
                  LEFT JOIN lender_detail ld ON l.id = ld.lender_id

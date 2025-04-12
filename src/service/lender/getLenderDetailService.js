@@ -21,6 +21,9 @@ export const getLenderDetailById = async (lenderId) => {
         additionalInformation: lender.additional_information,
         termsDocument: lender.terms_document,
         imageLink: lender.image_link,
+        basicInfo: lender.basic_info,
+        plusValue: lender.plus_value,
+        applymentTutorial: lender.applyment_tutorial,
         otherLenders: {
             another,
             anotherType,
