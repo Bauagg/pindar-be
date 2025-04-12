@@ -179,7 +179,9 @@ export const findLenderById = async (id) => {
             l.max_loan,
             l.max_tenor,
             lt.param_value AS type_loan_total,
+            lt.param_key as type_loan_total_id,
             p.param_value AS payment_type_name,
+            p.param_key as payment_type_id,
             ld.additional_information,
             ld.terms_document,
             CONCAT('/file/image/', f.id, f.file_extension) AS image_link
