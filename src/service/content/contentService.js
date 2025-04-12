@@ -34,7 +34,13 @@ export const fetchContentById = async (id) => {
     const content = await getContentById(id);
     if (!content) throw { status: 404, message: 'Content not found.' };
     const response = formatContentResponse(content);
-    response.imageLink = content.image_link;
+    if (response.imageLink !== null) {
+        const match = response.imageLink.match(/[0-9a-fA-F\-]{36}/);
+        if (match) {
+            const uuid = match[0];
+            response.imageId = uuid;
+        }
+    }
     return response
 };
 
@@ -76,7 +82,7 @@ const formatContentResponse = (content) => ({
     categoryName: content.category_name,
     contentDetail: content.content_detail,
     linkPath: content.link_path,
-    imageLink: content.image_id ? `/file/image/${content.image_id}` : null,
+    imageLink: content.image_id ? `/file/image/${content.image_id}` : content.image_link,
     createdDate: content.created_date,
     updatedDate: content.updated_date
 });
