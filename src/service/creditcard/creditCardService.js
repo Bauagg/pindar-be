@@ -97,7 +97,6 @@ const formatCreditCardResponse = (creditCard) => ({
     title: creditCard.title,
     yearlyFee: creditCard.yearly_fee,
     additionalCardAnnualFee: creditCard.additional_card_annual_fee,
-    detailYearlyFee: creditCard.detail_yearly_fee,
     purchaseRate: creditCard.purchase_rate,
     cashbackRate: creditCard.cashback_rate,
     monthlyIncomeMinimum: creditCard.monthly_income_minimum,
@@ -109,10 +108,13 @@ const formatCreditCardResponse = (creditCard) => ({
     mainCardMinimumAge: creditCard.main_card_minimum_age,
     mainCardMaximumAge: creditCard.main_card_maximum_age,
     additionalCardMinimumAge: creditCard.additional_card_minimum_age,
-    additionalInformation: creditCard.additional_information,
+    detailInformation: creditCard.detail_information,
     termsDocument: creditCard.terms_document,
-    productDescription: creditCard.product_description,
     billPaymentTutorial: creditCard.bill_payment_tutorial,
+    basicInfo: creditCard.basic_info,
+    mainFeature: creditCard.main_feature,
+    allFacilities: creditCard.all_facilities,
+    feeAndCharges: creditCard.fee_and_charges,
     publisher: {
         id: creditCard.publisher_id,
         name: creditCard.publisher_name
@@ -122,6 +124,7 @@ const formatCreditCardResponse = (creditCard) => ({
         name: creditCard.type_name
     },
     imageLink: creditCard.image_link,
-    features: creditCard.features
+    features: creditCard.features // assuming this is joined elsewhere
 });
+
 

@@ -34,10 +34,10 @@ export const insertCreditCard = async (data) => {
         const cardId = rows[0].id;
 
         await client.query(
-            `INSERT INTO credit_card_detail (card_id, additional_information, terms_document, product_description, bill_payment_tutorial) 
-       VALUES ($1, $2, $3, $4, $5)`,
+            `INSERT INTO credit_card_detail (card_id, terms_document, bill_payment_tutorial, detail_information, main_feature, all_facilities, fee_and_charges)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
             [
-                cardId, data.additionalInformation, data.termsDocument, data.productDescription, data.billPaymentTutorial
+                cardId, data.termsDocument, data.billPaymentTutorial, data.detailInformation, data.mainFeature, data.allFacilities, data.feeAndCharges
             ]
         );
 
@@ -76,15 +76,17 @@ export const getCreditCardById = async (id) => {
                 c.main_card_minimum_age,
                 c.main_card_maximum_age,
                 c.additional_card_minimum_age,
-                cd.additional_information,
+                cd.detail_information,
                 cd.terms_document,
-                cd.product_description,
                 cd.bill_payment_tutorial,
+                cd.main_feature,
+                cd.all_facilities,
+                cd.fee_and_charges,
                 cp.id AS publisher_id,
                 cp.publisher_name,
                 cf.id AS type_id,
                 cf.feature_name AS type_name,
-                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id) ELSE NULL END AS image_link
+                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM credit_card c
                   JOIN credit_card_detail cd ON c.id = cd.card_id
                   JOIN card_publisher cp ON c.publisher_id = cp.id AND cp.is_deleted = FALSE
