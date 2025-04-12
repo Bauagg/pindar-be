@@ -155,13 +155,50 @@ export const getCreditCardById = async (req, res, next) => {
 
 export const getCreditCardList = async (req, res, next) => {
     try {
-        const { limit = 10, offset = 0, search = '' } = req.query;
-        const creditCards = await fetchCreditCardsList(parseInt(limit, 10), parseInt(offset, 10), search);
-        res.status(200).json({ code: 200, message: 'Credit card list retrieved successfully.', data: creditCards });
+        const {
+            limit = 10,
+            offset = 0,
+            search = '',
+            publisherId,
+            featureIds,
+            minYearlyFee,
+            maxYearlyFee,
+            minYearlyIncome,
+            maxYearlyIncome,
+            sortBy,
+            sortDirection
+        } = req.query;
+
+        const filters = {
+            publisherId,
+            featureIds: featureIds
+                ? featureIds
+                    .split(',')
+                    .map(id => id.trim())
+                    .filter(id => /^[0-9a-fA-F\-]{36}$/.test(id)) // Basic UUID v4 format check
+                : [],
+            minYearlyFee: minYearlyFee ? parseFloat(minYearlyFee) : undefined,
+            maxYearlyFee: maxYearlyFee ? parseFloat(maxYearlyFee) : undefined,
+            minYearlyIncome: minYearlyIncome ? parseFloat(minYearlyIncome) : undefined,
+            maxYearlyIncome: maxYearlyIncome ? parseFloat(maxYearlyIncome) : undefined,
+            sortBy,
+            sortDirection,
+            limit: parseInt(limit, 10),
+            offset: parseInt(offset, 10),
+            search
+        };
+        const creditCards = await fetchCreditCardsList(filters);
+
+        res.status(200).json({
+            code: 200,
+            message: 'Credit card list retrieved successfully.',
+            data: creditCards
+        });
     } catch (err) {
         next(err);
     }
 };
+
 
 export const updateCreditCard = async (req, res, next) => {
     try {
@@ -189,22 +226,25 @@ export const searchCreditCards = async (req, res, next) => {
     try {
         const filters = {
             publisherId: req.query.publisherId,
-            featureIds: req.query.featureIds ? req.query.featureIds.split(",") : [],
-            minYearlyFee: req.query.minYearlyFee ? parseInt(req.query.minYearlyFee, 10) : undefined,
-            maxYearlyFee: req.query.maxYearlyFee ? parseInt(req.query.maxYearlyFee, 10) : undefined,
-            minYearlyIncome: req.query.minYearlyIncome ? parseInt(req.query.minYearlyIncome, 10) : undefined,
-            maxYearlyIncome: req.query.maxYearlyIncome ? parseInt(req.query.maxYearlyIncome, 10) : undefined,
+            featureIds: req.query.featureIds
+                ? req.query.featureIds.split(',').map(id => id.trim()).filter(id => /^[0-9a-fA-F\-]{36}$/.test(id))
+                : [],
+            minYearlyFee: req.query.minYearlyFee ? parseFloat(req.query.minYearlyFee) : undefined,
+            maxYearlyFee: req.query.maxYearlyFee ? parseFloat(req.query.maxYearlyFee) : undefined,
+            minYearlyIncome: req.query.minYearlyIncome ? parseFloat(req.query.minYearlyIncome) : undefined,
+            maxYearlyIncome: req.query.maxYearlyIncome ? parseFloat(req.query.maxYearlyIncome) : undefined,
             sortBy: req.query.sortBy,
             sortDirection: req.query.sortDirection,
             limit: req.query.limit ? parseInt(req.query.limit, 10) : 10,
             offset: req.query.offset ? parseInt(req.query.offset, 10) : 0
         };
 
-        const creditCards = await fetchCreditCardsList(filters);
+        const result = await fetchCreditCardsList(filters);
+
         res.status(200).json({
             code: 200,
             message: "Credit cards retrieved successfully.",
-            data: creditCards
+            data: result
         });
     } catch (error) {
         next(error);

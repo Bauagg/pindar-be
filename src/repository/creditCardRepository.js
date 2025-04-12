@@ -176,10 +176,22 @@ export const deleteCreditCardById = async (id) => {
     );
 };
 
-export const searchCreditCards = async ({ publisherId, featureIds, minYearlyFee, maxYearlyFee, minYearlyIncome, maxYearlyIncome, sortBy, sortDirection, limit, offset }) => {
-    let query = `
-        SELECT c.id, c.title, c.yearly_fee, c.detail_yearly_fee, 
-               CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
+export const searchCreditCards = async (filters) => {
+    const {
+        publisherId,
+        featureIds,
+        minYearlyFee,
+        maxYearlyFee,
+        minYearlyIncome,
+        maxYearlyIncome,
+        sortBy,
+        sortDirection,
+        limit,
+        offset,
+        search
+    } = filters;
+
+    let baseQuery = `
         FROM credit_card c
         LEFT JOIN files f ON c.image_id = f.id
         WHERE c.is_deleted = FALSE
@@ -189,46 +201,63 @@ export const searchCreditCards = async ({ publisherId, featureIds, minYearlyFee,
 
     if (publisherId) {
         queryParams.push(publisherId);
-        query += ` AND c.publisher_id = $${queryParams.length}`;
+        baseQuery += ` AND c.publisher_id = $${queryParams.length}`;
     }
 
     if (featureIds && featureIds.length > 0) {
         const placeholders = featureIds.map((_, index) => `$${queryParams.length + index + 1}`).join(",");
         queryParams.push(...featureIds);
-        query += ` AND c.id IN (
-            SELECT DISTINCT ccf.credit_card_id 
-            FROM credit_card_features ccf
-            WHERE ccf.feature IN (${placeholders})
-        )`;
+        baseQuery += ` AND c.feature_type_id IN (${placeholders})`;
     }
 
     if (minYearlyFee !== undefined) {
         queryParams.push(minYearlyFee);
-        query += ` AND c.yearly_fee >= $${queryParams.length}`;
+        baseQuery += ` AND c.yearly_fee >= $${queryParams.length}`;
     }
 
     if (maxYearlyFee !== undefined) {
         queryParams.push(maxYearlyFee);
-        query += ` AND c.yearly_fee <= $${queryParams.length}`;
+        baseQuery += ` AND c.yearly_fee <= $${queryParams.length}`;
     }
 
     if (minYearlyIncome !== undefined) {
         queryParams.push(minYearlyIncome);
-        query += ` AND c.yearly_income_minimum >= $${queryParams.length}`;
+        baseQuery += ` AND c.yearly_income_minimum >= $${queryParams.length}`;
     }
 
     if (maxYearlyIncome !== undefined) {
         queryParams.push(maxYearlyIncome);
-        query += ` AND c.yearly_income_minimum <= $${queryParams.length}`;
+        baseQuery += ` AND c.yearly_income_minimum <= $${queryParams.length}`;
     }
 
-    query += ` ORDER BY ${sortBy} ${sortDirection} LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    if (search) {
+        queryParams.push(`%${search.toLowerCase()}%`);
+        baseQuery += ` AND LOWER(c.title) LIKE $${queryParams.length}`;
+    }
 
-    queryParams.push(limit, offset);
+    // 1. Get total count
+    const countQuery = `SELECT COUNT(*) ${baseQuery}`;
+    const countResult = await pool.query(countQuery, queryParams);
+    const total = parseInt(countResult.rows[0].count, 10);
 
-    const { rows } = await pool.query(query, queryParams);
-    return rows;
+    // 2. Get paginated rows
+    const dataQuery = `
+        SELECT c.id, c.title, c.yearly_fee, c.detail_yearly_fee,
+               CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
+        ${baseQuery}
+        ORDER BY ${sortBy} ${sortDirection}
+        LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
+    `;
+    const dataParams = [...queryParams, limit, offset];
+    const dataResult = await pool.query(dataQuery, dataParams);
+
+    return {
+        data: dataResult.rows,
+        total
+    };
 };
+
+
 
 export const checkPublisherExists = async (publisherId) => {
     const { rows } = await pool.query(

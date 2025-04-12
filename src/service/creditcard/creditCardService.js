@@ -52,7 +52,7 @@ export const fetchCreditCardsList = async (filters) => {
         throw { status: 400, message: "Invalid sort direction." };
     }
 
-    const creditCards = await searchCreditCards({
+    const { data, total } = await searchCreditCards({
         publisherId,
         featureIds,
         minYearlyFee,
@@ -61,11 +61,21 @@ export const fetchCreditCardsList = async (filters) => {
         maxYearlyIncome,
         sortBy,
         sortDirection,
-        limit: parseInt(limit, 10),
-        offset: parseInt(offset, 10)
+        limit,
+        offset
     });
 
-    return creditCards.map(formatCreditCardResponse);
+    const formatted = data.map(formatCreditCardResponse);
+
+    return {
+        creditCards: formatted,
+        pagination: {
+            total,
+            totalPages: Math.ceil(total / limit),
+            currentPage: Math.floor(offset / limit) + 1,
+            size: limit
+        }
+    };
 };
 
 export const modifyCreditCard = async (id, data) => {
@@ -124,7 +134,7 @@ const formatCreditCardResponse = (creditCard) => ({
         name: creditCard.type_name
     },
     imageLink: creditCard.image_link,
-    features: creditCard.features // assuming this is joined elsewhere
+    features: creditCard.features
 });
 
 
