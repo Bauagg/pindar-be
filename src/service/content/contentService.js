@@ -44,8 +44,8 @@ export const fetchContentById = async (id) => {
     return response
 };
 
-export const fetchContentList = async (limit, offset, search, sortBy, sortDirection) => {
-    const contents = await getContentList(limit, offset, search, sortBy, sortDirection);
+export const fetchContentList = async (limit, offset, search, sortBy, sortDirection, categoryId) => {
+    const contents = await getContentList(limit, offset, search, sortBy, sortDirection, categoryId);
 
     return {
         contents: contents.contents.map(formatContentResponse),

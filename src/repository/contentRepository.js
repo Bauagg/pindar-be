@@ -47,28 +47,44 @@ export const getContentById = async (id) => {
     return rows[0];
 };
 
-export const getContentList = async (limit, offset, sortBy, sortDirection) => {
+export const getContentList = async (limit, offset, sortBy, sortDirection, categoryId = null) => {
     const validSortColumns = ["title", "category_name", "created_date"];
     if (!validSortColumns.includes(sortBy)) sortBy = "created_date";
     if (!["asc", "desc"].includes(sortDirection.toLowerCase())) sortDirection = "desc";
 
     const client = await pool.connect();
     try {
-        const contentResult = await client.query(
-            `SELECT c.id, c.title, cc.name AS category_name, c.link_path, c.created_date,
+        let baseQuery = `
+            SELECT c.id, c.title, cc.name AS category_name, c.link_path, c.created_date,
                 CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id::TEXT, f.file_extension) ELSE NULL END AS image_link
             FROM content c
             JOIN content_category cc ON c.category_id = cc.id
             LEFT JOIN files f ON c.image_id = f.id
             WHERE c.is_deleted = FALSE
-            ORDER BY ${sortBy} ${sortDirection}
-            LIMIT $1 OFFSET $2`,
-            [limit, offset]
-        );
+        `;
 
-        const totalResult = await client.query(
-            `SELECT COUNT(*) FROM content WHERE is_deleted = FALSE`
-        );
+        let countQuery = `
+            SELECT COUNT(*) FROM content c
+            WHERE c.is_deleted = FALSE
+        `;
+
+        const queryParams = [];
+        let paramIndex = 1;
+
+        // Add category filter if provided
+        if (categoryId !== null) {
+            baseQuery += ` AND c.category_id = $${paramIndex}`;
+            countQuery += ` AND c.category_id = $${paramIndex}`;
+            queryParams.push(categoryId);
+            paramIndex++;
+        }
+
+        // Add pagination
+        baseQuery += ` ORDER BY ${sortBy} ${sortDirection} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        queryParams.push(limit, offset);
+
+        const contentResult = await client.query(baseQuery, queryParams);
+        const totalResult = await client.query(countQuery, categoryId !== null ? [categoryId] : []);
 
         return {
             contents: contentResult.rows,
@@ -76,13 +92,14 @@ export const getContentList = async (limit, offset, sortBy, sortDirection) => {
                 total: parseInt(totalResult.rows[0].count, 10),
                 totalPages: Math.ceil(totalResult.rows[0].count / limit),
                 currentPage: Math.floor(offset / limit) + 1,
-                size: limit // ✅ Now includes `size`
+                size: limit
             }
         };
     } finally {
         client.release();
     }
 };
+
 
 
 export const updateContentById = async (id, { title, categoryId, contentDetail, linkPath, imageId }) => {
