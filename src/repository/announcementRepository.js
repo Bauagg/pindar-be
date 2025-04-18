@@ -30,7 +30,7 @@ export const createAnnouncement = async ({ status, url, imageId, order }) => {
 export const getAnnouncementById = async (id) => {
     const { rows } = await pool.query(
         `SELECT a.id, a.status, a.url, a.order,
-                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, '.', f.file_extension) ELSE NULL END AS image_link
+                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM announcement a
          LEFT JOIN files f ON a.image = f.id
          WHERE a.id = $1 AND a.is_deleted = FALSE`,
@@ -42,7 +42,7 @@ export const getAnnouncementById = async (id) => {
 export const getPaginatedAnnouncements = async (limit, offset) => {
     const { rows } = await pool.query(
         `SELECT a.id, a.status, a.url, a.order,
-                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, '.', f.file_extension) ELSE NULL END AS image_link
+                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM announcement a
          LEFT JOIN files f ON a.image = f.id
          WHERE a.is_deleted = FALSE
