@@ -19,10 +19,14 @@ export const addContentCategory = async (data) => {
     return formatCategoryResponse(category);
 };
 
-export const fetchContentCategories = async () => {
-    const categories = await getAllContentCategories();
-    return categories.map(formatCategoryResponse);
+export const fetchContentCategories = async (limit, offset, search) => {
+    const result = await getAllContentCategories(limit, offset, search);
+    return {
+        categories: result.categories.map(formatCategoryResponse),
+        pagination: result.pagination
+    };
 };
+
 
 export const fetchContentCategoryById = async (id) => {
     const category = await getContentCategoryById(id);

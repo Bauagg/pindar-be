@@ -19,10 +19,14 @@ export const addCardPublisher = async (data) => {
     return formatPublisherResponse(publisher);
 };
 
-export const fetchCardPublishers = async () => {
-    const publishers = await getAllCardPublishers();
-    return publishers.map(formatPublisherResponse);
+export const fetchCardPublishers = async (limit, offset, search) => {
+    const result = await getAllCardPublishers(limit, offset, search);
+    return {
+        publishers: result.publishers.map(formatPublisherResponse),
+        pagination: result.pagination
+    };
 };
+
 
 export const fetchCardPublisherById = async (id) => {
     const publisher = await getCardPublisherById(id);

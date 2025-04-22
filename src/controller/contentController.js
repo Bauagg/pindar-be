@@ -37,13 +37,34 @@ export const getContentById = async (req, res, next) => {
 
 export const getContentList = async (req, res, next) => {
     try {
-        const { limit = 10, offset = 0, sortBy = 'created_date', sortDirection = 'desc' } = req.query;
-        const contentList = await fetchContentList(parseInt(limit, 10), parseInt(offset, 10), sortBy, sortDirection, req.query.categoryId);
-        res.status(200).json({ code: 200, message: 'Content list retrieved successfully.', data: contentList });
+        const {
+            limit = 10,
+            offset = 0,
+            sortBy = 'created_date',
+            sortDirection = 'desc',
+            categoryId = null,
+            search = ''
+        } = req.query;
+
+        const contentList = await fetchContentList(
+            parseInt(limit, 10),
+            parseInt(offset, 10),
+            search,
+            sortBy,
+            sortDirection,
+            categoryId
+        );
+
+        res.status(200).json({
+            code: 200,
+            message: 'Content list retrieved successfully.',
+            data: contentList
+        });
     } catch (err) {
         next(err);
     }
 };
+
 
 export const updateContent = async (req, res, next) => {
     try {

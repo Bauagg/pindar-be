@@ -18,12 +18,29 @@ export const createProductFaq = async (req, res, next) => {
 export const getProductFaqs = async (req, res, next) => {
     try {
         const { productType } = req.params;
-        const faqs = await fetchProductFaqsByType(productType);
-        res.status(200).json({ code: 200, message: 'Product FAQs retrieved successfully.', data: faqs });
+        const {
+            limit = 10,
+            offset = 0,
+            search = ""
+        } = req.query;
+
+        const faqs = await fetchProductFaqsByType(
+            productType,
+            parseInt(limit, 10),
+            parseInt(offset, 10),
+            search
+        );
+
+        res.status(200).json({
+            code: 200,
+            message: 'Product FAQs retrieved successfully.',
+            data: faqs
+        });
     } catch (err) {
         next(err);
     }
 };
+
 
 export const getProductFaqById = async (req, res, next) => {
     try {

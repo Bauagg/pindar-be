@@ -47,10 +47,11 @@ export const getContentById = async (id) => {
     return rows[0];
 };
 
-export const getContentList = async (limit, offset, sortBy, sortDirection, categoryId = null) => {
+export const getContentList = async (limit, offset, search, sortBy, sortDirection, categoryId = null) => {
     const validSortColumns = ["title", "category_name", "created_date"];
-    if (!validSortColumns.includes(sortBy)) sortBy = "created_date";
-    if (!["asc", "desc"].includes(sortDirection.toLowerCase())) sortDirection = "desc";
+    sortBy = validSortColumns.includes(sortBy) ? sortBy : "created_date";
+    sortDirection = (sortDirection || "desc").toLowerCase();
+    if (!["asc", "desc"].includes(sortDirection)) sortDirection = "desc";
 
     const client = await pool.connect();
     try {
@@ -65,26 +66,39 @@ export const getContentList = async (limit, offset, sortBy, sortDirection, categ
 
         let countQuery = `
             SELECT COUNT(*) FROM content c
+            JOIN content_category cc ON c.category_id = cc.id
             WHERE c.is_deleted = FALSE
         `;
 
         const queryParams = [];
+        const countParams = [];
         let paramIndex = 1;
 
-        // Add category filter if provided
+        // Category filter
         if (categoryId !== null) {
             baseQuery += ` AND c.category_id = $${paramIndex}`;
             countQuery += ` AND c.category_id = $${paramIndex}`;
             queryParams.push(categoryId);
+            countParams.push(categoryId);
             paramIndex++;
         }
 
-        // Add pagination
+        // Search filter (case-insensitive using ILIKE)
+        if (search && search.trim() !== "") {
+            baseQuery += ` AND (c.title ILIKE $${paramIndex} OR cc.name ILIKE $${paramIndex})`;
+            countQuery += ` AND (c.title ILIKE $${paramIndex} OR cc.name ILIKE $${paramIndex})`;
+            const searchPattern = `%${search}%`;
+            queryParams.push(searchPattern);
+            countParams.push(searchPattern);
+            paramIndex++;
+        }
+
+        // Pagination
         baseQuery += ` ORDER BY ${sortBy} ${sortDirection} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
         queryParams.push(limit, offset);
 
         const contentResult = await client.query(baseQuery, queryParams);
-        const totalResult = await client.query(countQuery, categoryId !== null ? [categoryId] : []);
+        const totalResult = await client.query(countQuery, countParams);
 
         return {
             contents: contentResult.rows,
@@ -99,7 +113,6 @@ export const getContentList = async (limit, offset, sortBy, sortDirection, categ
         client.release();
     }
 };
-
 
 
 export const updateContentById = async (id, { title, categoryId, contentDetail, linkPath, imageId }) => {

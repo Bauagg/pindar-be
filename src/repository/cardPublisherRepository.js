@@ -10,12 +10,48 @@ export const insertCardPublisher = async ({ number, publisherName }) => {
     return rows[0];
 };
 
-export const getAllCardPublishers = async () => {
-    const { rows } = await pool.query(
-        `SELECT * FROM card_publisher WHERE is_deleted = FALSE ORDER BY number ASC`
-    );
-    return rows;
+export const getAllCardPublishers = async (limit, offset, search = "") => {
+    const queryParams = [];
+    let paramIndex = 1;
+
+    let baseQuery = `
+        SELECT * FROM card_publisher
+        WHERE is_deleted = FALSE
+    `;
+    let countQuery = `
+        SELECT COUNT(*) FROM card_publisher
+        WHERE is_deleted = FALSE
+    `;
+
+    if (search.trim() !== "") {
+        baseQuery += ` AND publisher_name ILIKE $${paramIndex}`;
+        countQuery += ` AND publisher_name ILIKE $${paramIndex}`;
+        queryParams.push(`%${search}%`);
+        paramIndex++;
+    }
+
+    baseQuery += ` ORDER BY number ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    queryParams.push(limit, offset);
+
+    const client = await pool.connect();
+    try {
+        const dataResult = await client.query(baseQuery, queryParams);
+        const countResult = await client.query(countQuery, queryParams.slice(0, paramIndex - 1));
+
+        return {
+            publishers: dataResult.rows,
+            pagination: {
+                total: parseInt(countResult.rows[0].count, 10),
+                totalPages: Math.ceil(countResult.rows[0].count / limit),
+                currentPage: Math.floor(offset / limit) + 1,
+                size: limit
+            }
+        };
+    } finally {
+        client.release();
+    }
 };
+
 
 export const getCardPublisherById = async (id) => {
     const { rows } = await pool.query(

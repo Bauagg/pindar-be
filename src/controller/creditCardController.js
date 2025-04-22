@@ -29,12 +29,28 @@ export const createCardPublisher = async (req, res, next) => {
 
 export const getCardPublishers = async (req, res, next) => {
     try {
-        const publishers = await fetchCardPublishers();
-        res.status(200).json({ code: 200, message: 'Card publishers retrieved successfully.', data: publishers });
+        const {
+            limit = 10,
+            offset = 0,
+            search = ""
+        } = req.query;
+
+        const publishers = await fetchCardPublishers(
+            parseInt(limit, 10),
+            parseInt(offset, 10),
+            search
+        );
+
+        res.status(200).json({
+            code: 200,
+            message: 'Card publishers retrieved successfully.',
+            data: publishers
+        });
     } catch (err) {
         next(err);
     }
 };
+
 
 export const getCardPublisherById = async (req, res, next) => {
     try {
@@ -77,12 +93,28 @@ export const createCardFeature = async (req, res, next) => {
 
 export const getCardFeatures = async (req, res, next) => {
     try {
-        const features = await fetchCardFeatures();
-        res.status(200).json({ code: 200, message: 'Card features retrieved successfully.', data: features });
+        const {
+            limit = 10,
+            offset = 0,
+            search = ""
+        } = req.query;
+
+        const features = await fetchCardFeatures(
+            parseInt(limit, 10),
+            parseInt(offset, 10),
+            search
+        );
+
+        res.status(200).json({
+            code: 200,
+            message: 'Card features retrieved successfully.',
+            data: features
+        });
     } catch (err) {
         next(err);
     }
 };
+
 
 export const getCardFeatureById = async (req, res, next) => {
     try {

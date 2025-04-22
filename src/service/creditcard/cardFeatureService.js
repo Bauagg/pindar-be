@@ -19,10 +19,14 @@ export const addCardFeature = async (data) => {
     return formatFeatureResponse(feature);
 };
 
-export const fetchCardFeatures = async () => {
-    const features = await getAllCardFeatures();
-    return features.map(formatFeatureResponse);
+export const fetchCardFeatures = async (limit, offset, search) => {
+    const result = await getAllCardFeatures(limit, offset, search);
+    return {
+        features: result.features.map(formatFeatureResponse),
+        pagination: result.pagination
+    };
 };
+
 
 export const fetchCardFeatureById = async (id) => {
     const feature = await getCardFeatureById(id);

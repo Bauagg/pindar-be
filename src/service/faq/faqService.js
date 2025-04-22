@@ -18,10 +18,14 @@ export const addProductFaq = async (data) => {
     return formatFaqResponse(faq);
 };
 
-export const fetchProductFaqsByType = async (productType) => {
-    const faqs = await getProductFaqsByType(productType);
-    return faqs.map(formatFaqResponse);
+export const fetchProductFaqsByType = async (productType, limit, offset, search) => {
+    const result = await getProductFaqsByType(productType, limit, offset, search);
+    return {
+        faqs: result.faqs.map(formatFaqResponse),
+        pagination: result.pagination
+    };
 };
+
 
 export const fetchProductFaqById = async (id) => {
     const faq = await getProductFaqById(id);

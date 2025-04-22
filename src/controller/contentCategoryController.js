@@ -16,12 +16,28 @@ export const createContentCategory = async (req, res, next) => {
 
 export const getContentCategories = async (req, res, next) => {
     try {
-        const categories = await fetchContentCategories();
-        res.status(200).json({ code: 200, message: 'Content categories retrieved successfully.', data: categories });
+        const {
+            limit = 10,
+            offset = 0,
+            search = ""
+        } = req.query;
+
+        const categories = await fetchContentCategories(
+            parseInt(limit, 10),
+            parseInt(offset, 10),
+            search
+        );
+
+        res.status(200).json({
+            code: 200,
+            message: 'Content categories retrieved successfully.',
+            data: categories
+        });
     } catch (err) {
         next(err);
     }
 };
+
 
 export const getContentCategoryById = async (req, res, next) => {
     try {

@@ -10,13 +10,49 @@ export const insertProductFaq = async ({ productType, informationTitle, detailIn
     return rows[0];
 };
 
-export const getProductFaqsByType = async (productType) => {
-    const { rows } = await pool.query(
-        `SELECT * FROM product_faq WHERE LOWER(product_type) = LOWER($1) ORDER BY order_number ASC`,
-        [productType]
-    );
-    return rows;
+export const getProductFaqsByType = async (productType, limit, offset, search = "") => {
+    const queryParams = [productType.toLowerCase()];
+    let paramIndex = 2;
+
+    let baseQuery = `
+        SELECT * FROM product_faq
+        WHERE LOWER(product_type) = $1
+    `;
+    let countQuery = `
+        SELECT COUNT(*) FROM product_faq
+        WHERE LOWER(product_type) = $1
+    `;
+
+    if (search.trim() !== "") {
+        baseQuery += ` AND (information_title ILIKE $${paramIndex} OR detail_information ILIKE $${paramIndex})`;
+        countQuery += ` AND (information_title ILIKE $${paramIndex} OR detail_information ILIKE $${paramIndex})`;
+        queryParams.push(`%${search}%`);
+        paramIndex++;
+    }
+
+    baseQuery += ` ORDER BY order_number ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    queryParams.push(limit, offset);
+
+    const client = await pool.connect();
+    try {
+        const dataResult = await client.query(baseQuery, queryParams);
+        const countResult = await client.query(countQuery, queryParams.slice(0, paramIndex - 1));
+
+        return {
+            faqs: dataResult.rows,
+            pagination: {
+                total: parseInt(countResult.rows[0].count, 10),
+                totalPages: Math.ceil(countResult.rows[0].count / limit),
+                currentPage: Math.floor(offset / limit) + 1,
+                size: limit
+            }
+        };
+    } finally {
+        client.release();
+    }
 };
+
+
 
 export const getProductFaqById = async (id) => {
     const { rows } = await pool.query(`SELECT * FROM product_faq WHERE id = $1`, [id]);
