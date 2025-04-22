@@ -31,9 +31,9 @@ export const fetchAnnouncementById = async (id) => {
     return formatAnnouncementResponse(announcement);
 };
 
-export const fetchAnnouncements = async (limit = 10, offset = 0) => {
-    const announcements = await getPaginatedAnnouncements(limit, offset);
-    const total = await countAnnouncements();
+export const fetchAnnouncements = async (limit = 10, offset = 0, search = "") => {
+    const announcements = await getPaginatedAnnouncements(limit, offset, search);
+    const total = await countAnnouncements(search); // Include search in the count query
 
     return {
         announcements: announcements.map(formatAnnouncementResponse),
@@ -45,6 +45,7 @@ export const fetchAnnouncements = async (limit = 10, offset = 0) => {
         }
     };
 };
+
 
 export const modifyAnnouncement = async (id, data) => {
     const { status, url, imageId, order } = data;

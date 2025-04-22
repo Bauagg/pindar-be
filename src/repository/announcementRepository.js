@@ -39,19 +39,31 @@ export const getAnnouncementById = async (id) => {
     return rows[0];
 };
 
-export const getPaginatedAnnouncements = async (limit, offset) => {
-    const { rows } = await pool.query(
-        `SELECT a.id, a.status, a.url, a.order,
+export const getPaginatedAnnouncements = async (limit, offset, search = "") => {
+    const queryParams = [];
+    let paramIndex = 1;
+
+    let baseQuery = `
+        SELECT a.id, a.status, a.url, a.order,
                 CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM announcement a
          LEFT JOIN files f ON a.image = f.id
          WHERE a.is_deleted = FALSE
-         ORDER BY a.order ASC, a.id DESC
-         LIMIT $1 OFFSET $2`,
-        [limit, offset]
-    );
+    `;
+
+    if (search.trim() !== "") {
+        baseQuery += ` AND a.url ILIKE $${paramIndex}`;
+        queryParams.push(`%${search}%`);
+        paramIndex++;
+    }
+
+    baseQuery += ` ORDER BY a.order ASC, a.id DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    queryParams.push(limit, offset);
+
+    const { rows } = await pool.query(baseQuery, queryParams);
     return rows;
 };
+
 
 export const countAnnouncements = async () => {
     const { rows } = await pool.query(

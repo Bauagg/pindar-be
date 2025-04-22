@@ -36,8 +36,9 @@ export const getAnnouncements = async (req, res, next) => {
     try {
         const limit = parseInt(req.query.limit, 10) || 10;
         const offset = parseInt(req.query.offset, 10) || 0;
+        const search = req.query.search || ""; // Get search term from query parameters
 
-        const announcements = await fetchAnnouncements(limit, offset);
+        const announcements = await fetchAnnouncements(limit, offset, search);
         res.status(200).json({
             code: 200,
             message: "Announcements retrieved successfully.",
@@ -47,6 +48,7 @@ export const getAnnouncements = async (req, res, next) => {
         next(error);
     }
 };
+
 
 export const updateAnnouncement = async (req, res, next) => {
     try {
