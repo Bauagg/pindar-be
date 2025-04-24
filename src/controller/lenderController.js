@@ -2,7 +2,7 @@ import {addLenderService} from "../service/lender/createLenderService.js";
 import {modifyLender} from "../service/lender/updateLenderService.js";
 import {removeLender} from "../service/lender/deleteLenderService.js";
 import {getLenders} from "../service/lender/searchLenderService.js";
-import {getLenderDetailById} from "../service/lender/getLenderDetailService.js";
+import {getLenderDetailById, recordProductAccess} from "../service/lender/getLenderDetailService.js";
 import {fetchLenderDropdown} from "../service/lender/getLenderDropdownService.js";
 
 export const updateLender = async (req, res, next) => {
@@ -62,6 +62,13 @@ export const getLenderDetail = async (req, res, next) => {
         const lenderId = req.params.id;
         const lenderData = await getLenderDetailById(lenderId);
 
+        let userId = null;
+        if (req.user) {
+            userId = req.user.id;
+        }
+        recordProductAccess('lender', lenderId, userId, req).catch(error => {
+            console.error('Failed to record product access:', error);
+        });
         res.status(200).json({
             code: 200,
             message: 'Lender detail retrieved successfully.',

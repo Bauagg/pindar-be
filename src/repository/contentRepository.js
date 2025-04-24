@@ -47,6 +47,26 @@ export const getContentById = async (id) => {
     return rows[0];
 };
 
+export const recordContentView = async (contentId, userId, req) => {
+    const client = await pool.connect();
+    try {
+        // Get IP address and user agent from request
+        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+
+        // Insert the view, allowing null userId for non-logged in users
+        const query = `
+            INSERT INTO content_views (content_id, user_id, ip_address, user_agent)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id
+        `;
+
+        await client.query(query, [contentId, userId, ipAddress, userAgent]);
+    } finally {
+        client.release();
+    }
+};
+
 export const getContentList = async (limit, offset, search, sortBy, sortDirection, categoryId = null) => {
     const validSortColumns = ["title", "category_name", "created_date"];
     sortBy = validSortColumns.includes(sortBy) ? sortBy : "created_date";
@@ -57,10 +77,12 @@ export const getContentList = async (limit, offset, search, sortBy, sortDirectio
     try {
         let baseQuery = `
             SELECT c.id, c.title, cc.name AS category_name, c.link_path, c.created_date,
-                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id::TEXT, f.file_extension) ELSE NULL END AS image_link
+                   CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id::TEXT, f.file_extension) ELSE NULL END AS image_link,
+                   COUNT(cv.id) AS view_count
             FROM content c
-            JOIN content_category cc ON c.category_id = cc.id
-            LEFT JOIN files f ON c.image_id = f.id
+                     JOIN content_category cc ON c.category_id = cc.id
+                     LEFT JOIN files f ON c.image_id = f.id
+                     LEFT JOIN content_views cv ON c.id = cv.content_id
             WHERE c.is_deleted = FALSE
         `;
 
@@ -93,8 +115,72 @@ export const getContentList = async (limit, offset, search, sortBy, sortDirectio
             paramIndex++;
         }
 
+        baseQuery += ` GROUP BY c.id, cc.name, f.id, f.file_extension`;
+
         // Pagination
         baseQuery += ` ORDER BY ${sortBy} ${sortDirection} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        queryParams.push(limit, offset);
+
+        const contentResult = await client.query(baseQuery, queryParams);
+        const totalResult = await client.query(countQuery, countParams);
+
+        return {
+            contents: contentResult.rows,
+            pagination: {
+                total: parseInt(totalResult.rows[0].count, 10),
+                totalPages: Math.ceil(totalResult.rows[0].count / limit),
+                currentPage: Math.floor(offset / limit) + 1,
+                size: limit
+            }
+        };
+    } finally {
+        client.release();
+    }
+};
+
+export const getTrendingContent = async (limit, offset, lastCount, categoryId = null) => {
+    const client = await pool.connect();
+    try {
+        let baseQuery = `
+            SELECT c.id, c.title, cc.name AS category_name, c.link_path, c.created_date,
+                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id::TEXT, f.file_extension) ELSE NULL END AS image_link,
+                COUNT(cv.id) AS view_count
+            FROM content c
+            JOIN content_category cc ON c.category_id = cc.id
+            LEFT JOIN files f ON c.image_id = f.id
+            LEFT JOIN content_views cv ON c.id = cv.content_id 
+                AND cv.access_date >= NOW() - INTERVAL '$1 days'
+            WHERE c.is_deleted = FALSE
+        `;
+
+        let countQuery = `
+            SELECT COUNT(DISTINCT c.id) FROM content c
+            JOIN content_category cc ON c.category_id = cc.id
+            LEFT JOIN content_views cv ON c.id = cv.content_id 
+                AND cv.access_date >= NOW() - INTERVAL '$1 days'
+            WHERE c.is_deleted = FALSE
+        `;
+
+        const queryParams = [lastCount];
+        const countParams = [lastCount];
+        let paramIndex = 2;
+
+        // Category filter
+        if (categoryId !== null) {
+            baseQuery += ` AND c.category_id = $${paramIndex}`;
+            countQuery += ` AND c.category_id = $${paramIndex}`;
+            queryParams.push(categoryId);
+            countParams.push(categoryId);
+            paramIndex++;
+        }
+
+        // Group by and order by view count
+        baseQuery += ` 
+            GROUP BY c.id, cc.name, f.id, f.file_extension
+            HAVING COUNT(cv.id) > 0
+            ORDER BY view_count DESC, c.created_date DESC
+            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+        `;
         queryParams.push(limit, offset);
 
         const contentResult = await client.query(baseQuery, queryParams);

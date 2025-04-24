@@ -1,7 +1,7 @@
 import {
     deleteContentById,
     getContentById,
-    getContentList,
+    getContentList, getTrendingContent,
     insertContent,
     updateContentById
 } from "../../repository/contentRepository.js";
@@ -48,7 +48,21 @@ export const fetchContentList = async (limit, offset, search, sortBy, sortDirect
     const contents = await getContentList(limit, offset, search, sortBy, sortDirection, categoryId);
 
     return {
-        contents: contents.contents.map(formatContentResponse),
+        contents: contents.contents.map(formatContentResponses),
+        pagination: {
+            total: contents.pagination.total,
+            totalPages: contents.pagination.totalPages,
+            currentPage: contents.pagination.currentPage,
+            size: contents.pagination.size
+        }
+    };
+};
+
+export const fetchTrendingContent = async (limit, offset, lastCount, categoryId) => {
+    const contents = await getTrendingContent(limit, offset, lastCount, categoryId);
+
+    return {
+        contents: contents.contents.map(formatContentResponses),
         pagination: {
             total: contents.pagination.total,
             totalPages: contents.pagination.totalPages,
@@ -86,3 +100,15 @@ const formatContentResponse = (content) => ({
     createdDate: content.created_date,
     updatedDate: content.updated_date
 });
+
+const formatContentResponses = (content) => {
+    return {
+        id: content.id,
+        title: content.title,
+        category: content.category_name,
+        linkPath: content.link_path,
+        createdDate: content.created_date,
+        imageLink: content.image_link,
+        viewCount: parseInt(content.view_count || '0', 10) // Add view count to response
+    };
+};

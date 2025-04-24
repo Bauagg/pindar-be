@@ -14,6 +14,9 @@ export const apiPermissions = {
     "/api/notification/list": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/notification/read/:userId": ["ADMIN", "CUSTOMER", "CREATE"],
     "/api/notification/delete/:userId": ["ADMIN", "CUSTOMER", "CREATE"],
+    "/api/credit-card/detail/:ccId": ["PUBLIC"],
+    "/api/lender/detail/:lenderId": ["PUBLIC"],
+    "/api/content/detail/:contentId": ["PUBLIC"],
     // "/api/content/comment/replies/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
     // "/api/content/comment/list/:commentId": ["ADMIN", "CUSTOMER", "CREATE"],
 };

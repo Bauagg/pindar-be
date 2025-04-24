@@ -55,3 +55,28 @@ CREATE TABLE credit_card_features (
                                       credit_card_id UUID NOT NULL REFERENCES credit_card(id) ON DELETE CASCADE,
                                       feature TEXT NOT NULL
 );
+
+-- Create table for tracking product access
+CREATE TABLE product_access (
+                                id uuid PRIMARY KEY,
+                                product_type VARCHAR(50) NOT NULL,  -- 'lender' or 'credit_card'
+                                product_id INTEGER NOT NULL,
+                                access_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                user_id UUID,
+                                ip_address VARCHAR(45),
+                                user_agent TEXT
+);
+
+-- Function to get date from timestamp (for constraint)
+CREATE OR REPLACE FUNCTION get_date(timestamp) RETURNS date AS
+'SELECT $1::date' LANGUAGE SQL IMMUTABLE;
+
+-- Create unique constraint to prevent duplicate views per day from same user
+CREATE UNIQUE INDEX unique_product_view_per_day ON product_access
+    (product_type, product_id, user_id, get_date(access_date))
+    WHERE user_id IS NOT NULL;
+
+-- Create indexes for better performance
+CREATE INDEX idx_product_access_date ON product_access(access_date);
+CREATE INDEX idx_product_access_product ON product_access(product_type, product_id);
+CREATE INDEX idx_product_access_user ON product_access(user_id);

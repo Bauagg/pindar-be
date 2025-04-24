@@ -4,7 +4,7 @@ import {
     getContentById,
     updateContent,
     deleteContent,
-    getContentList
+    getContentList, getTrendingProductsController
 } from "../controller/contentController.js";
 
 import {
@@ -46,5 +46,7 @@ router.get("/comment/replies/:commentId", getCommentReplies);
 router.delete("/comment/:id", deleteComment);
 
 router.post("/comment/like/:commentId", likeOrUnlikeComment);
+
+router.get("/product/trending", getTrendingProductsController);
 
 export default router;

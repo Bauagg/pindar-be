@@ -1,4 +1,5 @@
 import {findLenderById, findLenderRelationsByType} from "../../repository/lenderRepository.js";
+import pool from "../../configuration/dbConfiguration.js";
 
 export const getLenderDetailById = async (lenderId) => {
     const lender = await findLenderById(lenderId);
@@ -29,4 +30,23 @@ export const getLenderDetailById = async (lenderId) => {
             anotherType,
         },
     };
+};
+
+export const recordProductAccess = async (productType, productId, userId, req) => {
+    const client = await pool.connect();
+    try {
+        // Get IP address and user agent from request
+        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+
+        const query = `
+            INSERT INTO product_access (product_type, product_id, user_id, ip_address, user_agent)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id
+        `;
+
+        await client.query(query, [productType, productId, userId, ipAddress, userAgent]);
+    } finally {
+        client.release();
+    }
 };

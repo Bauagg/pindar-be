@@ -22,6 +22,20 @@ export const authenticateAndAuthorize = (req, res, next) => {
             return next();
         }
 
+        if (allowedRoles.includes("PUBLIC")) {
+            if (!token) {
+                return next()
+            }
+            jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+                if (err) {
+                     next();
+                }
+                req.user = decoded; // Attach user data (email, roles) to request object
+                 next();
+            });
+            return
+        }
+
         if (!token) {
             const error = new Error("Access token required.");
             error.status = 401;

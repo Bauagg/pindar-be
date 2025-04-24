@@ -14,7 +14,7 @@ import {
 import {
     addCreditCard,
     fetchCreditCardById, fetchCreditCardsList,
-    modifyCreditCard, removeCreditCard
+    modifyCreditCard, recordProductAccess, removeCreditCard
 } from "../service/creditcard/creditCardService.js";
 
 
@@ -179,6 +179,17 @@ export const getCreditCardById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const creditCard = await fetchCreditCardById(id);
+
+        let userId = null;
+        if (req.user) {
+            userId = req.user.id;
+        }
+
+        // Record the product access asynchronously
+        recordProductAccess('credit_card', id, userId, req).catch(error => {
+            console.error('Failed to record product access:', error);
+        });
+
         res.status(200).json({ code: 200, message: 'Credit card retrieved successfully.', data: creditCard });
     } catch (err) {
         next(err);
