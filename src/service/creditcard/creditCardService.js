@@ -1,7 +1,7 @@
 import {
     checkFeatureExists,
     checkPublisherExists,
-    deleteCreditCardById,
+    deleteCreditCardById, fetchCreditCardFeatures,
     getCreditCardById, getCreditCards,
     insertCreditCard, searchCreditCards,
     updateCreditCardById
@@ -66,7 +66,13 @@ export const fetchCreditCardsList = async (filters) => {
         offset
     });
 
-    const formatted = data.map(formatCreditCardResponse);
+    const cardIds = data.map(card => card.id);
+    const featuresMap = await fetchCreditCardFeatures(cardIds);
+
+    const formatted = data.map(card => ({
+        ...formatCreditCardResponse(card),
+        features: featuresMap[card.id] || []
+    }));
 
     return {
         creditCards: formatted,
@@ -78,6 +84,7 @@ export const fetchCreditCardsList = async (filters) => {
         }
     };
 };
+
 
 export const modifyCreditCard = async (id, data) => {
     const publisherExists = await checkPublisherExists(data.publisherId);

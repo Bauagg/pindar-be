@@ -257,6 +257,31 @@ export const searchCreditCards = async (filters) => {
     };
 };
 
+export const fetchCreditCardFeatures = async (creditCardIds) => {
+    if (!creditCardIds.length) return {};
+
+    const placeholders = creditCardIds.map((_, i) => `$${i + 1}`).join(",");
+    const query = `
+        SELECT credit_card_id, feature_id, feature
+        FROM credit_card_features
+        WHERE credit_card_id IN (${placeholders})
+    `;
+
+    const result = await pool.query(query, creditCardIds);
+
+    // Group features by credit_card_id
+    const grouped = {};
+    for (const row of result.rows) {
+        if (!grouped[row.credit_card_id]) {
+            grouped[row.credit_card_id] = [];
+        }
+        grouped[row.credit_card_id].push({
+            feature: row.feature
+        });
+    }
+
+    return grouped;
+};
 
 
 export const checkPublisherExists = async (publisherId) => {

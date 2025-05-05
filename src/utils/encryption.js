@@ -8,6 +8,7 @@ const privateKey = process.env.PRIVATE_KEY.replace(/\\n/g, '\n');
 
 export const decryptPassword = (encryptedPassword) => {
     const buffer = Buffer.from(encryptedPassword, "base64");
+    console.log(privateKey)
     const decrypted = crypto.privateDecrypt(
         {
             key: privateKey,
