@@ -2,13 +2,16 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import {apiPermissions} from "../configuration/apiPermission.js";
 import { match } from 'path-to-regexp';
+import { promisify } from "util";
 
 dotenv.config();
 
-export const authenticateAndAuthorize = (req, res, next) => {
+const verifyToken = promisify(jwt.verify); // convert to async function
+
+export const authenticateAndAuthorize = async (req, res, next) => {
     try {
-        const authHeader = req.headers["Authorization"] || req.headers["authorization"];
-        const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+        const authHeader = req.headers["authorization"] || req.headers["Authorization"];
+        const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
 
         const matchedPath = Object.keys(apiPermissions).find(pathPattern => {
             const matcher = match(pathPattern, { decode: decodeURIComponent });
@@ -17,54 +20,43 @@ export const authenticateAndAuthorize = (req, res, next) => {
 
         const allowedRoles = apiPermissions[matchedPath];
 
-        if (!allowedRoles) {
-            // If API is not listed in config, it's public and doesn't require authentication
+        // Public API
+        if (!allowedRoles || allowedRoles.includes("PUBLIC")) {
+            if (!token) return next(); // no token, allow public access
+
+            try {
+                req.user = await verifyToken(token, process.env.JWT_SECRET);
+            } catch (err) {
+                // invalid token for public route — still allow access
+                return next();
+            }
+
             return next();
         }
 
-        if (allowedRoles.includes("PUBLIC")) {
-            if (!token) {
-                return next()
-            }
-            jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-                if (err) {
-                     next();
-                }
-                req.user = decoded; // Attach user data (email, roles) to request object
-                 next();
-            });
-            return
-        }
-
+        // Protected API
         if (!token) {
-            const error = new Error("Access token required.");
-            error.status = 401;
-            throw error;
+            return res.status(401).json({ message: "Access token required." });
         }
 
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                const error = new Error("Invalid or expired access token.");
-                error.status = 403;
-                throw error;
-            }
+        let decoded;
+        try {
+            decoded = await verifyToken(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(403).json({ message: "Invalid or expired access token." });
+        }
 
-            // Extract user roles from token
-            const userRoles = decoded.roles || [];
+        const userRoles = decoded.roles || [];
+        const hasPermission = userRoles.some(role => allowedRoles.includes(role));
 
-            // Check if the user has at least one required role for this API
-            const hasPermission = userRoles.some(role => allowedRoles.includes(role));
+        if (!hasPermission) {
+            return res.status(403).json({ message: "You do not have permission to access this resource." });
+        }
 
-            if (!hasPermission) {
-                const error = new Error("You do not have permission to access this resource.");
-                error.status = 403;
-                throw error;
-            }
-
-            req.user = decoded; // Attach user data (email, roles) to request object
-            next();
-        });
-    } catch (error) {
-        next(error); // Pass error to the global error handler
+        req.user = decoded;
+        next();
+    } catch (err) {
+        next(err); // fallback for unexpected errors
     }
 };
+
