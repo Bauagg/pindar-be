@@ -44,35 +44,41 @@ export const fetchLenders = async (limit, offset, search, sortBy, sortDirection,
         }
 
         if (loanType) {
-            filterConditions += ` AND LOWER(l.loan_type) = LOWER($${paramIndex})`;
-            queryParams.push(loanType);
-            paramIndex++;
+            const loanTypes = loanType.split(";").map(type => type.trim()).filter(Boolean).map(d=>d.toLowerCase());
+            if (loanTypes.length > 0) {
+                const loanPlaceholders = loanTypes.map(() => `$${paramIndex++}`);
+                filterConditions += ` AND LOWER(l.loan_type) IN (${loanPlaceholders.join(", ")})`;
+                queryParams.push(...loanTypes);
+            }
         }
 
         if (paymentType) {
-            filterConditions += ` AND LOWER(l.payment_type) = LOWER($${paramIndex})`;
-            queryParams.push(paymentType);
-            paramIndex++;
+            const paymentTypes = paymentType.split(";").map(type => type.trim()).filter(Boolean).map(d=>d.toLowerCase());
+            if (paymentTypes.length > 0) {
+                const paymentPlaceholders = paymentTypes.map(() => `$${paramIndex++}`);
+                filterConditions += ` AND LOWER(l.payment_type) IN (${paymentPlaceholders.join(", ")})`;
+                queryParams.push(...paymentTypes);
+            }
         }
 
         // Query for paginated results
         const lendersResult = await client.query(
-            `SELECT l.id, l.lender_name as lenderName, 
-              CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, 
-              l.max_tenor AS maxTenor, 
-              l.max_loan AS maxLoan
-       FROM lender l
-       LEFT JOIN files f ON l.image_id = f.id
-       WHERE ${filterConditions}
-       ORDER BY ${sortBy} ${sortDirection}
-       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-            [...queryParams, limit, offset] // Add limit & offset at the end
+            `SELECT l.id, l.lender_name AS lenderName, 
+                    CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, 
+                    l.max_tenor AS maxTenor, 
+                    l.max_loan AS maxLoan
+             FROM lender l
+             LEFT JOIN files f ON l.image_id = f.id
+             WHERE ${filterConditions}
+             ORDER BY ${sortBy} ${sortDirection}
+             LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+            [...queryParams, limit, offset]
         );
 
-        // Query for total count (WITHOUT LIMIT & OFFSET)
+        // Query for total count
         const totalResult = await client.query(
             `SELECT COUNT(*) FROM lender l WHERE ${filterConditions}`,
-            queryParams // Use only the filtering parameters
+            queryParams
         );
 
         return {
@@ -83,6 +89,7 @@ export const fetchLenders = async (limit, offset, search, sortBy, sortDirection,
         client.release();
     }
 };
+
 
 export const fetchLenderDropdownData = async () => {
     const query = `

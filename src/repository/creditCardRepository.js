@@ -12,9 +12,9 @@ export const insertCreditCard = async (data) => {
                                 minimum_withdraw, monthly_income_minimum, who_can_register, must_have_credit_card, 
                                 created_by, yearly_income_minimum, monthly_minimum_payment, late_payment_charge_penalty,
                                       late_payment_admin_charge, maximum_withdraw_daily, main_card_minimum_age,
-                                      main_card_maximum_age, additional_card_minimum_age
+                                      main_card_maximum_age, additional_card_minimum_age, direct_link
                          ) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
        RETURNING id`,
             [
                 data.imageId, data.publisherId, data.featureTypeId, data.rewardOrFee, data.detailRewardOrFee, data.title,
@@ -27,7 +27,8 @@ export const insertCreditCard = async (data) => {
                 data.maximumWithdrawDaily,
                 data.mainCardMinimumAge,
                 data.mainCardMaximumAge,
-                data.additionalCardMinimumAge
+                data.additionalCardMinimumAge,
+                data.redirectLink
             ]
         );
 
@@ -86,6 +87,7 @@ export const getCreditCardById = async (id) => {
                 cp.publisher_name,
                 cf.id AS type_id,
                 cf.feature_name AS type_name,
+                c.direct_link, 
                 CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM credit_card c
                   JOIN credit_card_detail cd ON c.id = cd.card_id
@@ -124,24 +126,24 @@ export const updateCreditCardById = async (id, data) => {
                  detail_yearly_fee = $5, title = $6, additional_card_annual_fee = $7, 
                  purchase_rate = $8, cashback_rate = $9, detail_cashback_rate = $10, 
                  minimum_withdraw = $11, monthly_income_minimum = $12, who_can_register = $13, 
-                 must_have_credit_card = $14, updated_by = $15, updated_date = NOW(), yearly_income_minimum = $17
+                 must_have_credit_card = $14, updated_by = $15, updated_date = NOW(), yearly_income_minimum = $17, direct_link = $18 
              WHERE id = $16 AND is_deleted = FALSE`,
             [
                 data.imageId, data.publisherId, data.featureTypeId, data.rewardOrFee, data.detailRewardOrFee, data.title,
                 data.additionalCardAnnualFee, data.purchaseRate, data.cashbackRate, data.detailCashbackRate,
                 data.minimumWithdraw, data.monthlyIncomeMinimum, data.whoCanRegister, data.mustHaveCreditCard,
-                data.updatedBy, id, data.yearlyIncomeMinimum
+                data.updatedBy, id, data.yearlyIncomeMinimum, data.redirectLink
             ]
         );
 
         // ✅ Update credit card detail
         await client.query(
             `UPDATE credit_card_detail 
-             SET additional_information = $1, terms_document = $2, product_description = $3, 
-                 bill_payment_tutorial = $4 
-             WHERE card_id = $5`,
+             SET detail_information = $1, terms_document = $2,
+                 bill_payment_tutorial = $3, main_feature = $4, all_facilities = $5, fee_and_charges = $6 
+             WHERE card_id = $7`,
             [
-                data.additionalInformation, data.termsDocument, data.productDescription, data.billPaymentTutorial, id
+                data.detailInformation, data.termsDocument, data.billPaymentTutorial, data.mainFeature, data.allFacilities, data.feeAndCharges, id
             ]
         );
 
@@ -193,7 +195,8 @@ export const searchCreditCards = async (filters) => {
 
     let baseQuery = `
         FROM credit_card c
-        LEFT JOIN files f ON c.image_id = f.id
+        LEFT JOIN files f ON c.image_id = f.id 
+        LEFT JOIN card_feature cf ON c.feature_type_id = cf.id 
         WHERE c.is_deleted = FALSE
     `;
 
@@ -242,9 +245,9 @@ export const searchCreditCards = async (filters) => {
 
     // 2. Get paginated rows
     const dataQuery = `
-        SELECT c.id, c.title, c.yearly_fee, c.detail_yearly_fee,
+        SELECT c.id, c.title, c.yearly_fee, c.detail_yearly_fee, cf.feature_name, cf.id as benefit_id, c.direct_link,
                CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
-        ${baseQuery}
+        ${baseQuery} 
         ORDER BY ${sortBy} ${sortDirection}
         LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
     `;

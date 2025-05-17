@@ -45,7 +45,7 @@ export const fetchCreditCardsList = async (filters) => {
         offset = 0
     } = filters;
 
-    if (!["yearly_fee", "yearly_income_minimum"].includes(sortBy)) {
+    if (!["yearly_fee", "yearly_income_minimum", "created_date"].includes(sortBy)) {
         throw { status: 400, message: "Invalid sort field." };
     }
 
@@ -152,6 +152,9 @@ const formatCreditCardResponse = (creditCard) => ({
     mainFeature: creditCard.main_feature,
     allFacilities: creditCard.all_facilities,
     feeAndCharges: creditCard.fee_and_charges,
+    benefitId: creditCard.benefit_id,
+    benefitName: creditCard.feature_name,
+    redicrectLink: creditCard.direct_link,
     publisher: {
         id: creditCard.publisher_id,
         name: creditCard.publisher_name
