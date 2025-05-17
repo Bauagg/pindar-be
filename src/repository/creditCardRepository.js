@@ -180,7 +180,7 @@ export const deleteCreditCardById = async (id) => {
 
 export const searchCreditCards = async (filters) => {
     const {
-        publisherId,
+        publisherIds,
         featureIds,
         minYearlyFee,
         maxYearlyFee,
@@ -202,9 +202,10 @@ export const searchCreditCards = async (filters) => {
 
     const queryParams = [];
 
-    if (publisherId) {
-        queryParams.push(publisherId);
-        baseQuery += ` AND c.publisher_id = $${queryParams.length}`;
+    if (publisherIds && publisherIds.length > 0) {
+        const placeholders = publisherIds.map((_, index) => `$${queryParams.length + index + 1}`).join(",");
+        queryParams.push(...publisherIds);
+        baseQuery += ` AND c.publisher_id IN (${placeholders})`;
     }
 
     if (featureIds && featureIds.length > 0) {

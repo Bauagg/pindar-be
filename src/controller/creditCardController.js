@@ -202,7 +202,7 @@ export const getCreditCardList = async (req, res, next) => {
             limit = 10,
             offset = 0,
             search = '',
-            publisherId,
+            publisherIds,
             featureIds,
             minYearlyFee,
             maxYearlyFee,
@@ -213,7 +213,12 @@ export const getCreditCardList = async (req, res, next) => {
         } = req.query;
 
         const filters = {
-            publisherId,
+            publisherIds: publisherIds
+                ? publisherIds
+                    .split(',')
+                    .map(id => id.trim())
+                    .filter(id => /^[0-9a-fA-F\-]{36}$/.test(id)) // Basic UUID v4 format check
+                : [],
             featureIds: featureIds
                 ? featureIds
                     .split(',')

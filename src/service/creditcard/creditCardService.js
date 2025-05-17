@@ -33,7 +33,7 @@ export const fetchCreditCardById = async (id) => {
 
 export const fetchCreditCardsList = async (filters) => {
     const {
-        publisherId,
+        publisherIds = [],
         featureIds = [],
         minYearlyFee,
         maxYearlyFee,
@@ -54,7 +54,7 @@ export const fetchCreditCardsList = async (filters) => {
     }
 
     const { data, total } = await searchCreditCards({
-        publisherId,
+        publisherIds,
         featureIds,
         minYearlyFee,
         maxYearlyFee,

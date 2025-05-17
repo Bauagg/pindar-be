@@ -44,7 +44,7 @@ export const fetchLenders = async (limit, offset, search, sortBy, sortDirection,
         }
 
         if (loanType) {
-            const loanTypes = loanType.split(";").map(type => type.trim()).filter(Boolean).map(d=>d.toLowerCase());
+            const loanTypes = loanType.split(",").map(type => type.trim()).filter(Boolean).map(d=>d.toLowerCase());
             if (loanTypes.length > 0) {
                 const loanPlaceholders = loanTypes.map(() => `$${paramIndex++}`);
                 filterConditions += ` AND LOWER(l.loan_type) IN (${loanPlaceholders.join(", ")})`;
@@ -53,7 +53,7 @@ export const fetchLenders = async (limit, offset, search, sortBy, sortDirection,
         }
 
         if (paymentType) {
-            const paymentTypes = paymentType.split(";").map(type => type.trim()).filter(Boolean).map(d=>d.toLowerCase());
+            const paymentTypes = paymentType.split(",").map(type => type.trim()).filter(Boolean).map(d=>d.toLowerCase());
             if (paymentTypes.length > 0) {
                 const paymentPlaceholders = paymentTypes.map(() => `$${paramIndex++}`);
                 filterConditions += ` AND LOWER(l.payment_type) IN (${paymentPlaceholders.join(", ")})`;
