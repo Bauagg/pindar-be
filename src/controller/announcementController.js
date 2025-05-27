@@ -76,8 +76,9 @@ export const deleteAnnouncement = async (req, res, next) => {
 };
 
 export const getActiveBanners = async (req, res, next) => {
+    const type = req.query.type
     try {
-        const banners = await fetchActiveAnnouncements();
+        const banners = await fetchActiveAnnouncements(type);
         res.status(200).json({
             code: 200,
             message: "Active banners retrieved successfully.",

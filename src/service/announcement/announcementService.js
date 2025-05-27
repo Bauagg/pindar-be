@@ -10,7 +10,7 @@ import {getParameterByKey} from "../../repository/parameterRepository.js";
 const validStatuses = ["active", "inactive"];
 
 export const insertAnnouncement = async (data) => {
-    const { status, url, imageId, order } = data;
+    const { status, url, imageId, order, type } = data;
 
     if (!status || !validStatuses.includes(status.toLowerCase())) {
         throw { status: 400, message: "Invalid status. Allowed values: Active, Inactive." };
@@ -22,7 +22,7 @@ export const insertAnnouncement = async (data) => {
 
     const normalizedStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
-    return await createAnnouncement({ status: normalizedStatus, url, imageId, order });
+    return await createAnnouncement({ status: normalizedStatus, url, imageId, order, type });
 };
 
 export const fetchAnnouncementById = async (id) => {
@@ -48,7 +48,7 @@ export const fetchAnnouncements = async (limit = 10, offset = 0, search = "") =>
 
 
 export const modifyAnnouncement = async (id, data) => {
-    const { status, url, imageId, order } = data;
+    const { status, url, imageId, order, type } = data;
 
     if (!status || !validStatuses.includes(status.toLowerCase())) {
         throw { status: 400, message: "Invalid status. Allowed values: Active, Inactive." };
@@ -60,15 +60,15 @@ export const modifyAnnouncement = async (id, data) => {
 
     const normalizedStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 
-    return formatAnnouncementResponse(await updateAnnouncementById(id, { status: normalizedStatus, url, imageId, order }));
+    return formatAnnouncementResponse(await updateAnnouncementById(id, { status: normalizedStatus, url, imageId, order, type }));
 };
 
 export const removeAnnouncement = async (id) => {
     await deleteAnnouncementById(id);
 };
 
-export const fetchActiveAnnouncements = async () => {
-    const announcements = await getActiveAnnouncements();
+export const fetchActiveAnnouncements = async (type) => {
+    const announcements = await getActiveAnnouncements(type);
     return announcements.map(formatAnnouncementResponse);
 };
 
@@ -87,5 +87,6 @@ const formatAnnouncementResponse = (announcement) => ({
     status: announcement.status,
     url: announcement.url,
     order: announcement.order,
-    imageLink: announcement.image_link
+    imageLink: announcement.image_link,
+    type: announcement.type
 });

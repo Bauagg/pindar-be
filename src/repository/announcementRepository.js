@@ -1,16 +1,16 @@
 import pool from "../configuration/dbConfiguration.js";
 
 
-export const createAnnouncement = async ({ status, url, imageId, order }) => {
+export const createAnnouncement = async ({ status, url, imageId, order, type }) => {
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
 
         const { rows } = await client.query(
-            `INSERT INTO announcement (status, url, image, "order")
-             VALUES ($1, $2, $3, $4)
+            `INSERT INTO announcement (status, url, image, "order", type)
+             VALUES ($1, $2, $3, $4, $5)
              RETURNING *`,
-            [status, url, imageId, order]
+            [status, url, imageId, order, type]
         );
 
         if (imageId) {
@@ -29,7 +29,7 @@ export const createAnnouncement = async ({ status, url, imageId, order }) => {
 
 export const getAnnouncementById = async (id) => {
     const { rows } = await pool.query(
-        `SELECT a.id, a.status, a.url, a.order,
+        `SELECT a.id, a.status, a.url, a.order, a.type,
                 CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM announcement a
          LEFT JOIN files f ON a.image = f.id
@@ -44,7 +44,7 @@ export const getPaginatedAnnouncements = async (limit, offset, search = "") => {
     let paramIndex = 1;
 
     let baseQuery = `
-        SELECT a.id, a.status, a.url, a.order,
+        SELECT a.id, a.status, a.url, a.order, a.type,
                 CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM announcement a
          LEFT JOIN files f ON a.image = f.id
@@ -72,7 +72,7 @@ export const countAnnouncements = async () => {
     return parseInt(rows[0].count, 10);
 };
 
-export const updateAnnouncementById = async (id, { status, url, imageId, order }) => {
+export const updateAnnouncementById = async (id, { status, url, imageId, order, type }) => {
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
@@ -86,10 +86,10 @@ export const updateAnnouncementById = async (id, { status, url, imageId, order }
 
         const { rows } = await client.query(
             `UPDATE announcement
-             SET status = $1, url = $2, image = $3, "order" = $4
+             SET status = $1, url = $2, image = $3, "order" = $4, type = $6
              WHERE id = $5 AND is_deleted = FALSE
              RETURNING *`,
-            [status, url, imageId, order, id]
+            [status, url, imageId, order, id, type]
         );
 
         if (imageId) {
@@ -119,14 +119,17 @@ export const deleteAnnouncementById = async (id) => {
     );
 };
 
-export const getActiveAnnouncements = async () => {
+export const getActiveAnnouncements = async (type) => {
     const { rows } = await pool.query(
-        `SELECT a.id, a.status, a.url, a.order,
+        `SELECT a.id, a.status, a.url, a.order, a.type,
                 CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id, f.file_extension) ELSE NULL END AS image_link
          FROM announcement a
-         LEFT JOIN files f ON a.image = f.id
-         WHERE a.is_deleted = FALSE AND a.status = 'Active'
-         ORDER BY a.order ASC`
+                  LEFT JOIN files f ON a.image = f.id
+         WHERE a.is_deleted = FALSE
+           AND a.status = 'Active'
+           AND ($1::text IS NULL OR LOWER(a.type) = LOWER($1))
+         ORDER BY a.order ASC`,
+        [type]
     );
     return rows;
 };
