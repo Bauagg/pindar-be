@@ -135,9 +135,14 @@ const formatCreditCardResponse = (creditCard) => ({
     id: creditCard.id,
     title: creditCard.title,
     yearlyFee: creditCard.yearly_fee,
+    detailYearlyFee: creditCard.detail_yearly_fee,
     additionalCardAnnualFee: creditCard.additional_card_annual_fee,
     purchaseRate: creditCard.purchase_rate,
     cashbackRate: creditCard.cashback_rate,
+    detailCashbackRate: creditCard.detail_cashback_rate,
+    minimumWithdraw: creditCard.minimum_withdraw,
+    whoCanRegister: creditCard.who_can_register,
+    mustHaveCreditCard: creditCard.must_have_credit_card,
     monthlyIncomeMinimum: creditCard.monthly_income_minimum,
     yearlyIncomeMinimum: creditCard.yearly_income_minimum,
     monthlyMinimumPayment: creditCard.monthly_minimum_payment,
@@ -150,13 +155,12 @@ const formatCreditCardResponse = (creditCard) => ({
     detailInformation: creditCard.detail_information,
     termsDocument: creditCard.terms_document,
     billPaymentTutorial: creditCard.bill_payment_tutorial,
-    basicInfo: creditCard.basic_info,
     mainFeature: creditCard.main_feature,
     allFacilities: creditCard.all_facilities,
     feeAndCharges: creditCard.fee_and_charges,
     benefitId: creditCard.benefit_id,
     benefitName: creditCard.feature_name,
-    redicrectLink: creditCard.direct_link,
+    redirectLink: creditCard.direct_link,
     publisher: {
         id: creditCard.publisher_id,
         name: creditCard.publisher_name
@@ -165,6 +169,7 @@ const formatCreditCardResponse = (creditCard) => ({
         id: creditCard.type_id,
         name: creditCard.type_name
     },
+    imageId: creditCard.image_id,
     imageLink: creditCard.image_link,
     features: creditCard.features
 });
