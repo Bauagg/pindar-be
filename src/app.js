@@ -13,6 +13,7 @@ import notificationRoute from "./route/notificationRoute.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authenticateAndAuthorize } from "./middleware/authMiddleware.js";
 import cors from "cors";
+import productRoute from "./route/productRoute.js";
 
 const app = express();
 const allowedOrigins = [
@@ -40,6 +41,7 @@ app.use("/api/credit-card", creditCardRoute);
 app.use("/api/content", contentRoute);
 app.use("/api/announcement", announcementRoute);
 app.use("/api/notification", notificationRoute);
+app.use("/api/product", productRoute);
 
 app.use(errorHandler);
 
