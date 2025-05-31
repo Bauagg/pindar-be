@@ -284,7 +284,8 @@ export const searchCreditCards = async (req, res, next) => {
             sortBy: req.query.sortBy,
             sortDirection: req.query.sortDirection,
             limit: req.query.limit ? parseInt(req.query.limit, 10) : 10,
-            offset: req.query.offset ? parseInt(req.query.offset, 10) : 0
+            offset: req.query.offset ? parseInt(req.query.offset, 10) : 0,
+            search: req.query.search
         };
 
         const result = await fetchCreditCardsList(filters);

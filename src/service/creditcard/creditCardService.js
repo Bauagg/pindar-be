@@ -42,7 +42,8 @@ export const fetchCreditCardsList = async (filters) => {
         sortBy = "yearly_fee",
         sortDirection = "asc",
         limit = 10,
-        offset = 0
+        offset = 0,
+        search = ''
     } = filters;
 
     if (!["yearly_fee", "yearly_income_minimum", "created_date"].includes(sortBy)) {
@@ -63,7 +64,8 @@ export const fetchCreditCardsList = async (filters) => {
         sortBy,
         sortDirection,
         limit,
-        offset
+        offset,
+        search
     });
 
     const cardIds = data.map(card => card.id);
