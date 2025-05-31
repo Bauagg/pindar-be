@@ -148,16 +148,16 @@ export const getTrendingContent = async (limit, offset, lastCount, categoryId = 
             FROM content c
             JOIN content_category cc ON c.category_id = cc.id
             LEFT JOIN files f ON c.image_id = f.id
-            LEFT JOIN content_views cv ON c.id = cv.content_id 
-                AND cv.access_date >= NOW() - INTERVAL '$1 days'
+            LEFT JOIN content_views cv ON c.id = cv.content_id
+                AND cv.access_date >= NOW() - (CAST($1 AS INTEGER) || ' days')::INTERVAL
             WHERE c.is_deleted = FALSE
         `;
 
         let countQuery = `
             SELECT COUNT(DISTINCT c.id) FROM content c
-            JOIN content_category cc ON c.category_id = cc.id
-            LEFT JOIN content_views cv ON c.id = cv.content_id 
-                AND cv.access_date >= NOW() - INTERVAL '$1 days'
+                                                 JOIN content_category cc ON c.category_id = cc.id
+                                                 LEFT JOIN content_views cv ON c.id = cv.content_id
+                AND cv.access_date >= NOW() - (CAST($1 AS INTEGER) || ' days')::INTERVAL
             WHERE c.is_deleted = FALSE
         `;
 
