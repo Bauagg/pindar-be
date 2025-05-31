@@ -23,7 +23,7 @@ export const forgotPassword = async ({ email }) => {
         }
 
         // ✅ Fetch email template from parameter table
-        const emailTemplateParam = await getParameterByKey("FORGOT_PASSWORD_EMAIL_TEMPLATE", client);
+        const emailTemplateParam = await getParameterByKey("FORGOT_PASSWORD_EMAIL_TEMPLATES", client);
         const emailSubjectParam = await getParameterByKey("FORGOT_PASSWORD_EMAIL_SUBJECT", client);
 
         if (!emailTemplateParam || !emailSubjectParam) {
