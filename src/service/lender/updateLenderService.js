@@ -12,7 +12,9 @@ export const modifyLender = async (data, userEmail) => {
     const { id, lenderName, directLink, maxLoan, loanType, paymentType, maxTenor,
         additionalInformation, termsDocument, imageId, anotherLend, anotherLenderType } = data;
 
-    if (!id || !lenderName || !directLink || !maxLoan || !loanType || !paymentType || !maxTenor || !imageId) {
+        console.log(data, 'ini data')
+
+    if (!id || !lenderName || !directLink || !maxLoan || !loanType || !paymentType || !maxTenor ) {
         throw { status: 400, message: 'Missing required fields.' };
     }
 
