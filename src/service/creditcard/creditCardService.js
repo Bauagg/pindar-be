@@ -99,6 +99,8 @@ export const modifyCreditCard = async (id, data) => {
         throw { status: 400, message: 'Invalid featureTypeId. Feature does not exist.' };
     }
 
+    
+
     const updatedCreditCard = await updateCreditCardById(id, data);
 
     return formatCreditCardResponse(updatedCreditCard);
