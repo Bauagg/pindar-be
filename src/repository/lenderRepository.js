@@ -100,7 +100,8 @@ export const fetchLenders = async (
       `SELECT l.id, l.lender_name AS lenderName, 
                     CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, 
                     l.max_tenor AS maxTenor, 
-                    l.max_loan AS maxLoan
+                    l.max_loan AS maxLoan,
+                    l.direct_link AS directLink
              FROM lender l
              LEFT JOIN files f ON l.image_id = f.id
              WHERE ${filterConditions}
