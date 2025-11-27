@@ -65,6 +65,7 @@ export const fetchLenders = async (
       paramIndex++;
     }
 
+    // console.log('halo')
     if (loanType) {
       const loanTypes = loanType
         .split(",")
