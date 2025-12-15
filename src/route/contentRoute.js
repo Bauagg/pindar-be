@@ -1,28 +1,31 @@
 import express from "express";
 import {
-    createContent,
-    getContentById,
-    updateContent,
-    deleteContent,
-    getContentList, getTrendingProductsController
+  createContent,
+  getContentById,
+  updateContent,
+  deleteContent,
+  updatePinValue,
+  getContentList,
+  getTrendingProductsController,
+  getContentListPinned,
 } from "../controller/contentController.js";
 
 import {
-    createContentCategory,
-    getContentCategories,
-    bulkCreateContentCategories,
-    getContentCategoryById,
-    updateContentCategory,
-    deleteContentCategory
+  createContentCategory,
+  getContentCategories,
+  bulkCreateContentCategories,
+  getContentCategoryById,
+  updateContentCategory,
+  deleteContentCategory,
 } from "../controller/contentCategoryController.js";
 
 import {
-    createComment,
-    getCommentsByContentId,
-    getCommentList,
-    getCommentReplies,
-    deleteComment,
-    likeOrUnlikeComment
+  createComment,
+  getCommentsByContentId,
+  getCommentList,
+  getCommentReplies,
+  deleteComment,
+  likeOrUnlikeComment,
 } from "../controller/commentController.js";
 
 const router = express.Router();
@@ -31,6 +34,8 @@ router.post("/create", createContent);
 router.get("/list", getContentList);
 router.get("/detail/:id", getContentById);
 router.put("/update/:id", updateContent);
+router.put("/update-pin/:id", updatePinValue);
+router.get("/list-pinned", getContentListPinned);
 router.delete("/delete/:id", deleteContent);
 
 router.post("/content-category", createContentCategory);

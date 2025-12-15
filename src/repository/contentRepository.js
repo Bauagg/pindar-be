@@ -76,7 +76,8 @@ export const getContentList = async (limit, offset, search, sortBy, sortDirectio
     const client = await pool.connect();
     try {
         let baseQuery = `
-            SELECT c.id, c.title, cc.name AS category_name, c.link_path, c.created_date,
+            SELECT c.id, c.title, cc.name AS category_name, c.link_path, c.created_date, c.is_pin,
+
                    CASE WHEN f.id IS NOT NULL THEN CONCAT('/file/image/', f.id::TEXT, f.file_extension) ELSE NULL END AS image_link,
                    COUNT(cv.id) AS view_count
             FROM content c
@@ -200,6 +201,43 @@ export const getTrendingContent = async (limit, offset, lastCount, categoryId = 
     }
 };
 
+export const getPinnedContent = async () => {
+  const client = await pool.connect();
+
+  try {
+    const contentResult = await client.query(`
+      SELECT 
+        c.id, 
+        c.title, 
+        cc.name AS category_name, 
+        c.link_path, 
+        c.created_date, 
+        c.is_pin,
+        CASE 
+          WHEN f.id IS NOT NULL 
+          THEN CONCAT('/file/image/', f.id::TEXT, f.file_extension) 
+          ELSE NULL 
+        END AS image_link,
+        COUNT(cv.id) AS view_count
+      FROM content c
+      JOIN content_category cc ON c.category_id = cc.id
+      LEFT JOIN files f ON c.image_id = f.id
+      LEFT JOIN content_views cv ON c.id = cv.content_id
+      WHERE c.is_deleted = FALSE
+        AND c.is_pin = TRUE
+      GROUP BY 
+        c.id, cc.name, f.id
+    `);
+
+    return {
+      contents: contentResult.rows,
+    };
+  } finally {
+    client.release();
+  }
+};
+
+
 
 export const updateContentById = async (id, { title, categoryId, contentDetail, linkPath, imageId }) => {
     const { rows } = await pool.query(
@@ -209,6 +247,26 @@ export const updateContentById = async (id, { title, categoryId, contentDetail, 
         [title, categoryId, contentDetail, linkPath, imageId, id]
     );
     return rows[0];
+};
+
+export const updateContentPinById = async (id, { is_pin }) => {
+    const { rows } = await pool.query(
+        `UPDATE content 
+     SET is_pin = $1, updated_date = NOW()
+     WHERE id = $2 RETURNING *`,
+        [is_pin, id]
+    );
+    return rows[0];
+};
+
+export const countPinnedContent = async () => {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS total 
+     FROM content 
+     WHERE is_pin = TRUE`
+  );
+
+  return rows[0].total;
 };
 
 export const deleteContentById = async (id) => {

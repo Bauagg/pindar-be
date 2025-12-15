@@ -65,7 +65,6 @@ export const fetchLenders = async (
       paramIndex++;
     }
 
-    // console.log('halo')
     if (loanType) {
       const loanTypes = loanType
         .split(",")
@@ -102,6 +101,7 @@ export const fetchLenders = async (
                     CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, 
                     l.max_tenor AS maxTenor, 
                     l.max_loan AS maxLoan,
+                    l.is_pin AS isPin,
                     l.direct_link AS directLink
              FROM lender l
              LEFT JOIN files f ON l.image_id = f.id

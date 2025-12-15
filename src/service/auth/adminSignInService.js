@@ -33,7 +33,9 @@ export const adminSignInService = async (email, encryptedPassword) => {
         }
 
         // Decrypt the password sent in the request
+     
         const decryptedPassword = decryptPassword(encryptedPassword);
+       
 
         // Validate password
         const isMatch = await bcrypt.compare(decryptedPassword, user.password);
