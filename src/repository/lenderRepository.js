@@ -326,3 +326,49 @@ export const findLenderRelationsByType = async (lenderId, relationType) => {
 
   return rows;
 };
+
+export const countPinnedLender = async () => {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS total 
+     FROM lender 
+     WHERE is_pin = TRUE`
+  );
+
+  return rows[0].total;
+};
+
+export const fetchPinnedLenders = async () => {
+  const client = await pool.connect();
+
+  try {
+    let filterConditions = "l.is_deleted = FALSE AND l.is_pin = TRUE";
+    const lendersResult = await client.query(
+      `SELECT l.id, l.lender_name AS lenderName, 
+                    CONCAT('/api/file/image/', f.id, f.file_extension) AS imageLink, 
+                    l.max_tenor AS maxTenor, 
+                    l.max_loan AS maxLoan,
+                    l.is_pin AS isPin,
+                    l.direct_link AS directLink
+             FROM lender l
+             LEFT JOIN files f ON l.image_id = f.id
+             WHERE ${filterConditions}
+             `
+    );
+
+    return {
+      lenders: lendersResult.rows,
+    };
+  } finally {
+    client.release();
+  }
+};
+
+export const updateLenderPinById = async (id, { is_pin }) => {
+  const { rows } = await pool.query(
+    `UPDATE lender
+     SET is_pin = $1, updated_date = NOW()
+     WHERE id = $2 RETURNING *`,
+    [is_pin, id]
+  );
+  return rows[0];
+};

@@ -1,5 +1,5 @@
 import {addLenderService} from "../service/lender/createLenderService.js";
-import {modifyLender} from "../service/lender/updateLenderService.js";
+import {modifyLender, modifyContentUpdatePinLender, fetchPinnedLender} from "../service/lender/updateLenderService.js";
 import {removeLender} from "../service/lender/deleteLenderService.js";
 import {getLenders} from "../service/lender/searchLenderService.js";
 import {getLenderDetailById, recordProductAccess} from "../service/lender/getLenderDetailService.js";
@@ -55,6 +55,34 @@ export const listLenders = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+};
+
+export const updatePinValue = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    console.log(id, 'iniuid')
+    const updatedContent = await modifyContentUpdatePinLender(id, req.body);
+    res.status(200).json({
+      code: 200,
+      message: "Content updated successfully.",
+      data: updatedContent,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getLenderListPinned = async (req, res, next) => {
+  try {
+    const contentList = await fetchPinnedLender();
+    res.status(200).json({
+      code: 200,
+      message: "Content list retrieved successfully.",
+      data: contentList,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const getLenderDetail = async (req, res, next) => {

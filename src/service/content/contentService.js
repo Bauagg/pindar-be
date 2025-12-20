@@ -142,8 +142,8 @@ export const modifyContentUpdatePin = async (id, data) => {
   const { is_pin } = data;
   const countPin = await countPinnedContent();
   console.log(is_pin, countPin)
-  if (countPin >= 3 && is_pin) {
-    throw { status: 400, message: "Hanya boleh 3 Berita Edukasi yang dipin di aplikasi" };
+  if (countPin >= 5 && is_pin) {
+    throw { status: 400, message: "Maksimal 5 Berita Edukasi yang dipin" };
   }
 
   const updatedContent = await updateContentPinById(id, { is_pin });
