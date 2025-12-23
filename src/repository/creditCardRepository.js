@@ -103,6 +103,8 @@ export const getCreditCardById = async (id) => {
                 cd.detail_information,
                 cd.terms_document,
                 cd.bill_payment_tutorial,
+                cd.term_and_conditions,
+                cd.apply_tutorial,
                 cd.main_feature,
                 cd.all_facilities,
                 cd.fee_and_charges,
@@ -183,8 +185,8 @@ export const updateCreditCardById = async (id, data) => {
     await client.query(
       `UPDATE credit_card_detail 
              SET detail_information = $1, terms_document = $2,
-                 bill_payment_tutorial = $3, main_feature = $4, all_facilities = $5, fee_and_charges = $6 
-             WHERE card_id = $7`,
+                 bill_payment_tutorial = $3, main_feature = $4, all_facilities = $5, fee_and_charges = $6, apply_tutorial = $7, term_and_conditions = $8
+             WHERE card_id = $9`,
       [
         data.detailInformation,
         data.termsDocument,
@@ -192,6 +194,8 @@ export const updateCreditCardById = async (id, data) => {
         data.mainFeature,
         data.allFacilities,
         data.feeAndCharges,
+        data.applyTutorial,
+        data.termAndConditions,
         id,
       ]
     );

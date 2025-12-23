@@ -26,13 +26,11 @@ import {
 export const createCardPublisher = async (req, res, next) => {
   try {
     const publisher = await addCardPublisher(req.body);
-    res
-      .status(201)
-      .json({
-        code: 201,
-        message: "Card publisher created successfully.",
-        data: publisher,
-      });
+    res.status(201).json({
+      code: 201,
+      message: "Card publisher created successfully.",
+      data: publisher,
+    });
   } catch (err) {
     next(err);
   }
@@ -62,13 +60,11 @@ export const getCardPublisherById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const publisher = await fetchCardPublisherById(id);
-    res
-      .status(200)
-      .json({
-        code: 200,
-        message: "Card publisher retrieved successfully.",
-        data: publisher,
-      });
+    res.status(200).json({
+      code: 200,
+      message: "Card publisher retrieved successfully.",
+      data: publisher,
+    });
   } catch (err) {
     next(err);
   }
@@ -78,13 +74,11 @@ export const updateCardPublisher = async (req, res, next) => {
   try {
     const { id } = req.params;
     const updatedPublisher = await modifyCardPublisher(id, req.body);
-    res
-      .status(200)
-      .json({
-        code: 200,
-        message: "Card publisher updated successfully.",
-        data: updatedPublisher,
-      });
+    res.status(200).json({
+      code: 200,
+      message: "Card publisher updated successfully.",
+      data: updatedPublisher,
+    });
   } catch (err) {
     next(err);
   }
@@ -105,13 +99,11 @@ export const deleteCardPublisher = async (req, res, next) => {
 export const createCardFeature = async (req, res, next) => {
   try {
     const feature = await addCardFeature(req.body);
-    res
-      .status(201)
-      .json({
-        code: 201,
-        message: "Card feature created successfully.",
-        data: feature,
-      });
+    res.status(201).json({
+      code: 201,
+      message: "Card feature created successfully.",
+      data: feature,
+    });
   } catch (err) {
     next(err);
   }
@@ -141,13 +133,11 @@ export const getCardFeatureById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const feature = await fetchCardFeatureById(id);
-    res
-      .status(200)
-      .json({
-        code: 200,
-        message: "Card feature retrieved successfully.",
-        data: feature,
-      });
+    res.status(200).json({
+      code: 200,
+      message: "Card feature retrieved successfully.",
+      data: feature,
+    });
   } catch (err) {
     next(err);
   }
@@ -157,13 +147,11 @@ export const updateCardFeature = async (req, res, next) => {
   try {
     const { id } = req.params;
     const updatedFeature = await modifyCardFeature(id, req.body);
-    res
-      .status(200)
-      .json({
-        code: 200,
-        message: "Card feature updated successfully.",
-        data: updatedFeature,
-      });
+    res.status(200).json({
+      code: 200,
+      message: "Card feature updated successfully.",
+      data: updatedFeature,
+    });
   } catch (err) {
     next(err);
   }
@@ -184,13 +172,11 @@ export const deleteCardFeature = async (req, res, next) => {
 export const bulkCreateCardFeatures = async (req, res, next) => {
   try {
     const features = await addBulkCardFeaturesService(req.body);
-    res
-      .status(201)
-      .json({
-        code: 201,
-        message: "Card features created successfully.",
-        data: features,
-      });
+    res.status(201).json({
+      code: 201,
+      message: "Card features created successfully.",
+      data: features,
+    });
   } catch (err) {
     next(err);
   }
@@ -199,13 +185,11 @@ export const bulkCreateCardFeatures = async (req, res, next) => {
 export const bulkCreateCardPublishers = async (req, res, next) => {
   try {
     const publishers = await addBulkCardPublishers(req.body);
-    res
-      .status(201)
-      .json({
-        code: 201,
-        message: "Card publishers created successfully.",
-        data: publishers,
-      });
+    res.status(201).json({
+      code: 201,
+      message: "Card publishers created successfully.",
+      data: publishers,
+    });
   } catch (err) {
     next(err);
   }
@@ -216,13 +200,11 @@ export const createCreditCard = async (req, res, next) => {
     const createdBy = req.user.email; // Extract from JWT middleware
     const creditCard = await addCreditCard({ ...req.body, createdBy });
 
-    res
-      .status(201)
-      .json({
-        code: 201,
-        message: "Credit card created successfully.",
-        data: creditCard,
-      });
+    res.status(201).json({
+      code: 201,
+      message: "Credit card created successfully.",
+      data: creditCard,
+    });
   } catch (err) {
     next(err);
   }
@@ -232,7 +214,6 @@ export const getCreditCardById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const creditCard = await fetchCreditCardById(id);
-
     let userId = null;
     if (req.user) {
       userId = req.user.id;
@@ -243,13 +224,11 @@ export const getCreditCardById = async (req, res, next) => {
       console.error("Failed to record product access:", error);
     });
 
-    res
-      .status(200)
-      .json({
-        code: 200,
-        message: "Credit card retrieved successfully.",
-        data: creditCard,
-      });
+    res.status(200).json({
+      code: 200,
+      message: "Credit card retrieved successfully.",
+      data: creditCard,
+    });
   } catch (err) {
     next(err);
   }
@@ -317,13 +296,11 @@ export const updateCreditCard = async (req, res, next) => {
 
     const updatedCard = await modifyCreditCard(id, { ...req.body, updatedBy });
 
-    res
-      .status(200)
-      .json({
-        code: 200,
-        message: "Credit card updated successfully.",
-        data: updatedCard,
-      });
+    res.status(200).json({
+      code: 200,
+      message: "Credit card updated successfully.",
+      data: updatedCard,
+    });
   } catch (err) {
     next(err);
   }
