@@ -19,12 +19,12 @@ export const addContent = async (data) => {
     throw { status: 400, message: "Missing required fields." };
   }
 
-  const notificationParam = await getParameterByKey(
-    "CONTENT_NOTIFICATION_TITLE"
-  );
-  const notificationTitle = notificationParam
-    ? notificationParam.param_value
-    : "New Content Published";
+  // const notificationParam = await getParameterByKey(
+  //   "CONTENT_NOTIFICATION_TITLE"
+  // );
+  // const notificationTitle = notificationParam
+  //   ? notificationParam.param_value
+  //   : "New Content Published";
 
   const content = await insertContent({
     title,
@@ -34,12 +34,12 @@ export const addContent = async (data) => {
     imageId,
   });
 
-  await createNotification({
-    userId: null,
-    title: notificationTitle,
-    detail: `Check out our latest content: ${title}`,
-    link: `/content/${content.id}`,
-  });
+  // await createNotification({
+  //   userId: null,
+  //   title: notificationTitle,
+  //   detail: `Check out our latest content: ${title}`,
+  //   link: `/content/${content.id}`,
+  // });
 
   return formatContentResponse(content);
 };
@@ -110,13 +110,11 @@ export const fetchTrendingContent = async (
   };
 };
 
-export const fetchPinnedContent = async (
-) => {
+export const fetchPinnedContent = async () => {
   const contents = await getPinnedContent();
 
   return {
     contents: contents.contents.map(formatContentResponses),
-
   };
 };
 
@@ -141,7 +139,7 @@ export const modifyContent = async (id, data) => {
 export const modifyContentUpdatePin = async (id, data) => {
   const { is_pin } = data;
   const countPin = await countPinnedContent();
-  console.log(is_pin, countPin)
+  console.log(is_pin, countPin);
   if (countPin >= 5 && is_pin) {
     throw { status: 400, message: "Maksimal 5 Berita Edukasi yang dipin" };
   }
