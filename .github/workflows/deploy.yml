@@ -30,5 +30,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/pindar-be:latest
-            ghcr.io/${{ github.repository_owner }}/pindar-be:${{ github.sha }}
+            ghcr.io/bauagg/pindar-be:latest
+            ghcr.io/bauagg/pindar-be:${{ github.sha }}
