@@ -31,3 +31,17 @@ jobs:
       - name: Lint
         run: npm run lint
         continue-on-error: true
+
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image (test only, not push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
